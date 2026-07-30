@@ -38,7 +38,7 @@ Las tools se llaman `mcp__hilbana__<nombre>` (aquí las nombro por `<nombre>`).
 |------|----------|--------|
 | `get_issue` | Contexto **completo** de UNA issue en una sola llamada | Es la tool estrella: úsala al empezar con cualquier issue |
 | `list_issues` | Lista issues (filtros opcionales `teamId`/`projectId`) | Panorámica de un team/proyecto |
-| `search_issues` | Búsqueda por texto en identificador/título/descripción | Encontrar una issue por palabra clave |
+| `search_issues` | Full-text (identificador, título, descripción, comentarios y campos de texto) + filtros por campo personalizado | Encontrar una issue por palabra clave o acotar por el valor de un campo |
 | `list_projects` | Lista projects visibles | Resolver el `projectId`, prueba de humo |
 | `list_comments` | Hilo de comentarios de una issue (cronológico) | Leer la discusión sin todo el contexto de `get_issue` |
 
@@ -58,6 +58,32 @@ get_issue { "id": "ABC-123" }
 ```
 search_issues { "query": "webhooks salientes", "limit": 10 }
 ```
+
+`search_issues` también **acota por el valor de un campo personalizado** (ver §2),
+en AND con la query textual. Con `query: ""` es un listado filtrado. Cada resultado
+trae además `customFields` con los valores de esa issue, así que no hace falta
+pedirlas una a una después.
+
+```
+search_issues {
+  "query": "",
+  "customFields": [{ "fieldId": "<f2>", "op": "gt", "value": 500 }]
+}
+// las issues con Importe > 500, con sus campos ya resueltos
+```
+
+Operadores por tipo (el `fieldId` sale de `list_custom_fields`):
+
+| Tipo | Operadores | `value` |
+|------|-----------|---------|
+| `checkbox` | `isTrue`, `isFalse`, `empty` | — |
+| `member` | `is`, `isNot`, `empty` | userId |
+| `number` | `eq`, `gt`, `lt`, `empty` | número |
+| `date` | `before`, `after`, `between`, `empty` | epoch ms (`between` usa `value2`) |
+| `text` | `contains`, `empty` | texto |
+
+`empty` es **sin valor**, no "falso": un checkbox en `false` no es `empty`. Un
+`fieldId` que no existe da error, no un filtro ignorado en silencio.
 
 ---
 
@@ -108,6 +134,8 @@ puede tener diez y otro ninguno. Cinco tipos, y cada uno espera un valor distint
 - El tipo se valida **contra la definición**: meter un texto en un campo `number`
   falla con un error claro en vez de guardarse torcido. No adivines el tipo, léelo
   de `list_custom_fields`.
+- Para **buscar** por ellos, `search_issues` (ver §1): full-text sobre los campos de
+  texto y filtros `customFields: [{fieldId, op, value}]` para el resto.
 
 ```
 list_custom_fields

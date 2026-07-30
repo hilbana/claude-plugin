@@ -20,6 +20,12 @@ criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
   - The skill documents the value each `type` expects (epoch ms for `date`, a member
     id for `member`…) and warns that the type is validated against the definition:
     a string in a `number` field fails loudly instead of being stored wrong.
+- **Searching by custom fields in `search_issues`.** It is now full-text over the
+  text fields too, and it takes `customFields: [{fieldId, op, value}]` to narrow by
+  value, combined in AND with the text query (`query: ""` makes it a filtered list).
+  The skill documents the operators per type — `empty` means *no value*, so a
+  checkbox set to `false` is not `empty` — and notes that results carry each issue's
+  `customFields`, so there is no need to fetch them one by one afterwards.
 
 ## [1.3.2] — 2026-07-30
 
