@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "hilbana",
   "displayName": "Hilbana",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Todo Hilbana para Claude Code en una sola instalación: memoria persistente de agentes por proyecto (reemplazo de engram, con hooks de carga al abrir y guardado automático al cerrar) + el framework de trabajo humano + agente (cola pull, commands del ciclo /hilbana-claim-next, /hilbana-finish, /hilbana-plan, /hilbana-review) + el MCP de Hilbana auto-registrado.",
   "author": { "name": "Hilbana" },
   "license": "MIT",

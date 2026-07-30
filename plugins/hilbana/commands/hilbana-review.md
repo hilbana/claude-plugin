@@ -1,5 +1,5 @@
 ---
-description: El revisor del framework humano+agente. Toma issues de Hilbana en «En revisión», verifica el trabajo contra la DoD (comando de verificación + commit/PR del record_run) y decide: cierra a Done si cumple, o la devuelve a In Progress con feedback accionable. Cierra el ciclo abierto por /hilbana-finish.
+description: "El revisor del framework humano+agente. Toma issues de Hilbana en «En revisión», verifica el trabajo contra la DoD (comando de verificación + commit/PR del record_run) y decide: cierra a Done si cumple, o la devuelve a In Progress con feedback accionable. Cierra el ciclo abierto por /hilbana-finish."
 argument-hint: "[ABC-123 | projectId]  (issue concreta a revisar, o proyecto para acotar; vacío = todas las de «En revisión»)"
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Cierra el trabajo de un worker sobre una issue de Hilbana respetando el gate de revisión del framework: verifica contra la DoD, deja la issue En revisión (NUNCA la cierra a Done — eso lo hace el revisor), registra el run (record_run), guarda el aprendizaje (mem_save), comenta para el revisor y suelta el lock. Encaja detrás de /hilbana-claim-next.
+description: "Cierra el trabajo de un worker sobre una issue de Hilbana respetando el gate de revisión del framework: verifica contra la DoD, deja la issue En revisión (NUNCA la cierra a Done — eso lo hace el revisor), registra el run (record_run), guarda el aprendizaje (mem_save), comenta para el revisor y suelta el lock. Encaja detrás de /hilbana-claim-next."
 argument-hint: "<ABC-123>  (identificador de la issue que estás terminando; por defecto la que reclamaste)"
 ---
 
