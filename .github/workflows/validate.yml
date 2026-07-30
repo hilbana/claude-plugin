@@ -1,0 +1,24 @@
+name: Validate
+
+# Gate on every push and PR. A component with broken frontmatter is dropped by
+# Claude Code silently — nothing errors, the skill just isn't there — so the only
+# way to catch it is to check before publishing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate plugin
+        run: node scripts/validate-plugin.mjs

@@ -35,6 +35,22 @@ optionally, a **base URL** if you self-host.
 plugins/hilbana/                  the plugin: commands, skills, hooks, scripts, MCP
 ```
 
+## Contributing
+
+Before pushing, run the validator:
+
+```bash
+node scripts/validate-plugin.mjs
+```
+
+CI runs it on every push and PR, and again as a gate before publishing a release. It
+guards the failure mode that bit us once: Claude Code **silently** drops a component
+whose frontmatter doesn't parse, so a stray `:` in a `description` can remove a
+command with nothing failing anywhere. Hence the rule it enforces — `description` and
+`argument-hint` are **always double-quoted** — plus checks on the manifests, the hook
+script paths, `node --check` on the hooks, and `REFERENCE.md` staying in sync with the
+files.
+
 ## Releases
 
 Versions are published as [releases](https://github.com/hilbana/claude-plugin/releases)

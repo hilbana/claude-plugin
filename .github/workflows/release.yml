@@ -20,6 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No publiques una versión que no carga. Duplicado a propósito con el workflow
+      # Validate: aquí es un gate, no un informe.
+      - name: Validate plugin
+        run: node scripts/validate-plugin.mjs
+
       - name: Leer la versión del plugin
         id: plugin
         run: |

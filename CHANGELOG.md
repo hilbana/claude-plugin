@@ -4,6 +4,24 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [1.3.2] — 2026-07-30
+
+### Added
+
+- **CI validation** (`scripts/validate-plugin.mjs`, run by the `Validate` workflow on
+  every push and PR, and as a gate before any release). It exists because of the
+  1.2.0 bug: Claude Code drops a component with broken frontmatter **silently**, so
+  the only way to catch it is to check before publishing. It enforces that
+  `description` and `argument-hint` are always double-quoted — a blunt rule that
+  kills the whole class of failure instead of guessing when a bare scalar is unsafe —
+  and also checks: frontmatter present and parseable, `description` required, no
+  unescaped inner quotes, a skill's `name` matching its folder, semver in
+  `plugin.json`, all four JSON manifests parsing, hooks pointing at scripts that
+  exist, `node --check` on every `.cjs`, marketplace entries resolving to a real
+  plugin with a matching name, the current version having a CHANGELOG entry, and
+  `REFERENCE.md` neither missing a component nor documenting one that no longer
+  exists.
+
 ## [1.3.1] — 2026-07-30
 
 ### Added
