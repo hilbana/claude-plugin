@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "hilbana",
+  "owner": { "name": "Hilbana" },
+  "description": "Plugins de Hilbana para Claude Code.",
+  "plugins": [
+    {
+      "name": "hilbana",
+      "source": "./plugins/hilbana",
+      "description": "Todo Hilbana en una instalación: memoria persistente de agentes (reemplazo de engram, con hooks de carga y guardado automático) + el framework de trabajo humano + agente (cola pull y los commands del ciclo /hilbana-claim-next, /hilbana-finish, /hilbana-plan, /hilbana-review) + el MCP de Hilbana auto-registrado."
+    }
+  ]
+}

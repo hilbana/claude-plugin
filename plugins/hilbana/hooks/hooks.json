@@ -1,0 +1,58 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-start.cjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/usage-report.cjs"],
+            "timeout": 10,
+            "env": {
+              "HILBANA_API_KEY": "${user_config.api_key}",
+              "HILBANA_BASE_URL": "${user_config.base_url}"
+            }
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-end.cjs"],
+            "timeout": 15,
+            "env": {
+              "HILBANA_API_KEY": "${user_config.api_key}",
+              "HILBANA_BASE_URL": "${user_config.base_url}"
+            }
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/usage-report.cjs"],
+            "timeout": 10,
+            "env": {
+              "HILBANA_API_KEY": "${user_config.api_key}",
+              "HILBANA_BASE_URL": "${user_config.base_url}"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
