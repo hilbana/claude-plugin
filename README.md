@@ -25,6 +25,36 @@ privacidad— está en el [README del plugin](plugins/hilbana/README.md).
 plugins/hilbana/                  el plugin: commands, skills, hooks, scripts, MCP
 ```
 
+## Versiones
+
+Las versiones se publican como [releases](https://github.com/hilbana/claude-plugin/releases)
+y se anotan en el [CHANGELOG](CHANGELOG.md). Para enterarte de las nuevas, pon el
+repo en **Watch → Custom → Releases**: Claude Code no avisa por su cuenta, solo
+muestra la actualización cuando abres `/plugin`.
+
+Para actualizar:
+
+```bash
+/plugin marketplace update hilbana
+/plugin install hilbana@hilbana
+```
+
+Y reinicia Claude Code (o `/reload-plugins`).
+
+### Qué cuenta como patch, minor o major
+
+La `version` de `plugin.json` es la fuente: al cambiarla en `main` se publica la
+release sola. Criterio:
+
+| Cambio | Salto |
+|--------|-------|
+| Arreglo en un command, skill o hook sin cambiar cómo se usa | **patch** (1.2.0 → 1.2.1) |
+| Command, skill o hook nuevo; comportamiento nuevo opcional | **minor** (1.2.0 → 1.3.0) |
+| Renombrar o quitar un command/skill, cambiar el nombre o el significado de un `userConfig`, o cualquier cosa que obligue al usuario a tocar su configuración | **major** (1.2.0 → 2.0.0) |
+
+Un plugin no tiene API que romper, pero sí memoria muscular: si alguien tiene
+`/hilbana-finish` en los dedos y desaparece, eso es un major.
+
 ## Privacidad
 
 El plugin **no contiene secretos**: tu API key vive solo en tu configuración local

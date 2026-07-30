@@ -1,0 +1,68 @@
+name: Release
+
+# Publica una release cuando cambia la `version` de plugin.json en main.
+# Idempotente: si el tag de esa versión ya existe, no hace nada, así que un push
+# que toque plugin.json sin subir la versión (o un re-run) es inofensivo.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - plugins/hilbana/.claude-plugin/plugin.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Leer la versión del plugin
+        id: plugin
+        run: |
+          version=$(node -p "require('./plugins/hilbana/.claude-plugin/plugin.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Versión declarada: $version"
+
+      - name: ¿Ya está publicada?
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "v${{ steps.plugin.outputs.version }}" >/dev/null 2>&1; then
+            echo "publicar=no" >> "$GITHUB_OUTPUT"
+            echo "v${{ steps.plugin.outputs.version }} ya existe: nada que hacer."
+          else
+            echo "publicar=si" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extraer las notas del CHANGELOG
+        if: steps.check.outputs.publicar == 'si'
+        run: |
+          version="${{ steps.plugin.outputs.version }}"
+          # La sección de esta versión, hasta el siguiente encabezado de versión.
+          # Con index() en vez de regex: la versión lleva puntos y corchetes, y
+          # escaparlos para awk es una fuente de fallos silenciosos.
+          awk -v cabecera="## [$version]" '
+            index($0, cabecera) == 1     { dentro = 1; next }
+            dentro && index($0, "## [") == 1 { exit }
+            dentro                       { print }
+          ' CHANGELOG.md > notas.md
+          if [ ! -s notas.md ]; then
+            echo "::warning::Sin entrada para $version en CHANGELOG.md; la release irá sin notas."
+            echo "Ver el CHANGELOG del repositorio." > notas.md
+          fi
+          cat notas.md
+
+      - name: Crear la release
+        if: steps.check.outputs.publicar == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.plugin.outputs.version }}" \
+            --title "v${{ steps.plugin.outputs.version }}" \
+            --notes-file notas.md \
+            --target "$GITHUB_SHA"
