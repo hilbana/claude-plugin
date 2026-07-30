@@ -1,60 +1,70 @@
 # Changelog
 
-Todas las versiones relevantes del plugin `hilbana`. Formato
-[Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
-[semántico](#qué-cuenta-como-patch-minor-o-major) según el criterio del README.
+Notable changes to the `hilbana` plugin. Format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
+criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
+
+## [1.3.0] — 2026-07-30
+
+### Changed
+
+- Public-facing text is now in **English**: both READMEs, this changelog, the
+  marketplace and plugin manifests, the `userConfig` labels shown at install time,
+  and every command/skill `description` and `argument-hint`.
+- The body of the commands and skills stays in **Spanish** on purpose. Those files
+  are prompts that steer how agents behave, full of precise caveats; a mechanical
+  translation would risk changing behaviour in ways no test would catch. The
+  Spanish is flagged in the manifests and the README so nobody is surprised.
 
 ## [1.2.0] — 2026-07-30
 
-### Añadido
+### Added
 
-- El plugin se publica en su propio repo público, `hilbana/claude-plugin`. Antes
-  vivía en el repo privado de la app, así que la instalación documentada no la podía
-  completar nadie de fuera.
-- `LICENSE` (MIT), que `plugin.json` ya declaraba.
+- The plugin now lives in its own public repository, `hilbana/claude-plugin`. It used
+  to sit inside the private application repo, which meant nobody outside could
+  complete the documented install.
+- `LICENSE` (MIT), which `plugin.json` already declared.
 
-### Corregido
+### Fixed
 
-- **`/hilbana-finish` y `/hilbana-review` no se cargaban.** Su `description` de
-  frontmatter contenía `: ` en un escalar plano (`del framework: verifica`,
-  `y decide: cierra`), que en YAML abre un mapping y rompe el parseo. Claude Code
-  cargaba 7 de los 9 componentes, y los dos que faltaban eran justo la mitad del
-  ciclo del framework: el worker no tenía cómo cerrar y el revisor no existía.
-- El hook `SessionStart` anunciaba al agente el prefijo de tools
-  `mcp__plugin_hilbana-memory_hilbana__…`, heredado del plugin deprecado
-  `hilbana-memory`. El real es `mcp__plugin_hilbana_hilbana__…`, así que el
-  recordatorio de memoria apuntaba a tools inexistentes en cada sesión.
-- El formato de la API key en `plugin.json` decía `mil_…`; es **`hil_…`**. La misma
-  errata estaba en la skill `hilbana-mcp`.
-- Cinco referencias al command `/hilbana-mcp-install`, que no existe.
-- `/hilbana-plan` mandaba leer un `get_doc` por UUID de un workspace privado: un
-  usuario externo no podía abrirlo. Ahora usa `list_docs` + `get_doc` genéricos.
+- **`/hilbana-finish` and `/hilbana-review` were never loading.** Their frontmatter
+  `description` contained `: ` in a plain scalar (`del framework: verifica`,
+  `y decide: cierra`), which opens a mapping in YAML and breaks parsing. Claude Code
+  loaded 7 of the 9 components, and the two missing ones were exactly half of the
+  framework cycle: the worker had no way to finish and the reviewer didn't exist.
+- The `SessionStart` hook told the agent its tools were prefixed
+  `mcp__plugin_hilbana-memory_hilbana__…`, inherited from the deprecated
+  `hilbana-memory` plugin. The real prefix is `mcp__plugin_hilbana_hilbana__…`, so
+  the memory reminder pointed at tools that didn't exist, every session.
+- The API key format in `plugin.json` said `mil_…`; it is **`hil_…`**. The same typo
+  was in the `hilbana-mcp` skill.
+- Five references to `/hilbana-mcp-install`, a command that doesn't exist.
+- `/hilbana-plan` told the agent to `get_doc` a UUID from a private workspace, which
+  no external user could open. It now uses plain `list_docs` + `get_doc`.
 
-### Cambiado
+### Changed
 
-- Documentación y ejemplos sin referencias internas: identificadores de ejemplo
-  genéricos (`ABC-123`) y el `scope` de memoria descrito como el nombre de la
-  carpeta del repo.
-- README con los comandos de instalación del repo público.
+- Docs and examples no longer carry internal references: example identifiers are
+  generic (`ABC-123`) and the memory `scope` is described as the repo folder name.
 
 ## [1.1.0] — 2026-07-27
 
-### Añadido
+### Added
 
-- Contabilidad de tokens por tarea: hooks `Stop`/`SessionEnd` que leen el
-  transcript, deduplican por `message.id` y reportan a `POST /api/agents/usage`.
+- Per-task token accounting: `Stop`/`SessionEnd` hooks that read the transcript,
+  deduplicate by `message.id` and report to `POST /api/agents/usage`.
 
-### Corregido
+### Fixed
 
-- Los hooks arrancaban con la API key vacía cuando la interpolación de `userConfig`
-  no llegaba (verificado en Windows). Ahora hay respaldo desde el store de
-  credenciales del plugin; sin él, ni el reporte de tokens ni el guardado de memoria
-  llegaban a ejecutarse, y en silencio.
+- The hooks started with an empty API key whenever the `userConfig` interpolation
+  didn't arrive (reproduced on Windows). They now fall back to the plugin's
+  credential store; without it, neither token reporting nor memory saving ever ran —
+  and did so silently.
 
 ## [1.0.0]
 
-### Añadido
+### Added
 
-- Plugin todo-en-uno: consolida los antiguos `hilbana-memory` y `hilbana-agents` en
-  uno solo. MCP auto-registrado, memoria por proyecto con hooks de carga y guardado,
-  los commands del ciclo y las skills `hilbana-mcp` y `hilbana-memoria`.
+- The all-in-one plugin, consolidating the former `hilbana-memory` and
+  `hilbana-agents` into one: MCP auto-registered, per-project memory with load/save
+  hooks, the cycle commands, and the `hilbana-mcp` and `hilbana-memoria` skills.

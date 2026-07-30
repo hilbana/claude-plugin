@@ -1,6 +1,6 @@
 ---
 name: hilbana-mcp
-description: Utilidades del MCP de Hilbana (gestor de proyectos self-hosted estilo Linear). Las 26 tools agrupadas por lectura / descubrimiento / contexto / escritura / orquestación / memoria, con cuándo usar cada una y ejemplos. Úsala siempre que operes issues, projects, docs, comentarios o coordinación multi-agente de Hilbana a través de las tools mcp__hilbana__*.
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 26 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana

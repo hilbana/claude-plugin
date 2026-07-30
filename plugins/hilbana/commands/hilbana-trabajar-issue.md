@@ -1,6 +1,6 @@
 ---
-description: Trabaja una issue de Hilbana de principio a fin con coordinación multi-agente en vivo (claim → contexto → trabajar+comentar+cambiar estado → release), enseñando los badges en la UI.
-argument-hint: "<ABC-123>  (identificador de la issue)"
+description: "Work a Hilbana issue end to end with live multi-agent coordination (claim → context → work+comment+change state → release), showing the badges as they appear in the UI."
+argument-hint: "<ABC-123>  (issue identifier)"
 ---
 
 # Trabajar una issue de Hilbana con un agente

@@ -1,6 +1,6 @@
 ---
 name: hilbana-memoria
-description: Memoria persistente de agentes en Hilbana (reemplazo de engram). Protocolo proactivo para guardar/buscar/recuperar contexto por proyecto vía las tools mcp__hilbana__mem_* (mem_save/mem_search/mem_context/mem_get/mem_session_summary). Úsala SIEMPRE que trabajes en un repo y quieras que las decisiones, bugs, convenciones y descubrimientos sobrevivan entre sesiones — en CUALQUIER repo, no solo en proyectos del gestor Hilbana.
+description: "Persistent agent memory in Hilbana (an engram replacement). The proactive protocol for saving, searching and reloading per-project context through the mcp__hilbana__mem_* tools (mem_save/mem_search/mem_context/mem_get/mem_session_summary). Use it ALWAYS when working in a repo and you want decisions, bugs, conventions and discoveries to survive across sessions — in ANY repo, not just projects tracked in Hilbana. Written in Spanish."
 ---
 
 # Memoria de agentes con Hilbana

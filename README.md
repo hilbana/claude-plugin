@@ -1,65 +1,69 @@
-# Plugin de Hilbana para Claude Code
+# Hilbana plugin for Claude Code
 
-Marketplace oficial del plugin **`hilbana`** para [Claude Code](https://claude.com/claude-code):
-memoria persistente de agentes por proyecto, el framework de trabajo humano + agente
-y el MCP de [Hilbana](https://app.hilbana.com) auto-registrado.
+Official marketplace for the **`hilbana`** plugin for [Claude Code](https://claude.com/claude-code):
+persistent per-project agent memory, the human+agent workflow framework, and
+[Hilbana](https://app.hilbana.com)'s MCP server auto-registered.
 
-## Instalación
+> **Language note:** the commands and skills are written in **Spanish**. They work
+> fine whatever language you talk to Claude in — Claude reads them and replies in
+> yours — but if you plan to edit them, expect Spanish prose inside.
+
+## Install
 
 ```bash
 /plugin marketplace add hilbana/claude-plugin
 /plugin install hilbana@hilbana
 ```
 
-Reinicia Claude Code. Al instalar te pedirá tu **API key** de Hilbana (formato
-`hil_…`, se crea en *Ajustes → API keys* de tu workspace) y, opcionalmente, la
-**URL base** si tienes una instalación self-hosted.
+Restart Claude Code. On install you'll be asked for your Hilbana **API key**
+(format `hil_…`, created under *Settings → API keys* in your workspace) and,
+optionally, a **base URL** if you self-host.
 
-El detalle completo —qué trae, requisitos, verificación, contabilidad de tokens y
-privacidad— está en el [README del plugin](plugins/hilbana/README.md).
+Full details — what's included, requirements, verification, token accounting and
+privacy — are in the [plugin README](plugins/hilbana/README.md).
 
-## Contenido
+## What's in here
 
 ```
-.claude-plugin/marketplace.json   el marketplace (una sola entrada: hilbana)
-plugins/hilbana/                  el plugin: commands, skills, hooks, scripts, MCP
+.claude-plugin/marketplace.json   the marketplace (a single entry: hilbana)
+plugins/hilbana/                  the plugin: commands, skills, hooks, scripts, MCP
 ```
 
-## Versiones
+## Releases
 
-Las versiones se publican como [releases](https://github.com/hilbana/claude-plugin/releases)
-y se anotan en el [CHANGELOG](CHANGELOG.md). Para enterarte de las nuevas, pon el
-repo en **Watch → Custom → Releases**: Claude Code no avisa por su cuenta, solo
-muestra la actualización cuando abres `/plugin`.
+Versions are published as [releases](https://github.com/hilbana/claude-plugin/releases)
+and recorded in the [CHANGELOG](CHANGELOG.md). To hear about new ones, set the repo
+to **Watch → Custom → Releases**: Claude Code doesn't notify you on its own, it only
+surfaces an update when you open `/plugin`.
 
-Para actualizar:
+To update:
 
 ```bash
 /plugin marketplace update hilbana
 /plugin install hilbana@hilbana
 ```
 
-Y reinicia Claude Code (o `/reload-plugins`).
+Then restart Claude Code (or run `/reload-plugins`).
 
-### Qué cuenta como patch, minor o major
+### What counts as patch, minor or major
 
-La `version` de `plugin.json` es la fuente: al cambiarla en `main` se publica la
-release sola. Criterio:
+The `version` field in `plugin.json` is the source of truth: change it on `main` and
+the release publishes itself.
 
-| Cambio | Salto |
-|--------|-------|
-| Arreglo en un command, skill o hook sin cambiar cómo se usa | **patch** (1.2.0 → 1.2.1) |
-| Command, skill o hook nuevo; comportamiento nuevo opcional | **minor** (1.2.0 → 1.3.0) |
-| Renombrar o quitar un command/skill, cambiar el nombre o el significado de un `userConfig`, o cualquier cosa que obligue al usuario a tocar su configuración | **major** (1.2.0 → 2.0.0) |
+| Change | Bump |
+|--------|------|
+| Fix to a command, skill or hook that doesn't change how you use it | **patch** (1.3.0 → 1.3.1) |
+| New command, skill or hook; new opt-in behaviour | **minor** (1.3.0 → 1.4.0) |
+| Renaming or removing a command/skill, changing the name or meaning of a `userConfig` field, or anything that forces users to touch their setup | **major** (1.3.0 → 2.0.0) |
 
-Un plugin no tiene API que romper, pero sí memoria muscular: si alguien tiene
-`/hilbana-finish` en los dedos y desaparece, eso es un major.
+A plugin has no API to break, but it does have muscle memory: if someone has
+`/hilbana-finish` in their fingers and it disappears, that's a major.
 
-## Privacidad
+## Privacy
 
-El plugin **no contiene secretos**: tu API key vive solo en tu configuración local
-de Claude Code (`userConfig`, marcada `sensitive`) y nunca se publica aquí.
+The plugin contains **no secrets**. Your API key lives only in your local Claude Code
+configuration (`userConfig`, marked `sensitive`) and is never published here.
 
-## Licencia
+## License
 
 [MIT](LICENSE)

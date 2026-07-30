@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "hilbana",
   "displayName": "Hilbana",
-  "version": "1.2.0",
-  "description": "Todo Hilbana para Claude Code en una sola instalación: memoria persistente de agentes por proyecto (reemplazo de engram, con hooks de carga al abrir y guardado automático al cerrar) + el framework de trabajo humano + agente (cola pull, commands del ciclo /hilbana-claim-next, /hilbana-finish, /hilbana-plan, /hilbana-review) + el MCP de Hilbana auto-registrado.",
+  "version": "1.3.0",
+  "description": "Everything Hilbana for Claude Code in one install: persistent per-project agent memory (an engram replacement, with hooks that load context on open and save a summary on close) + the human+agent workflow framework (pull queue and the cycle commands /hilbana-claim-next, /hilbana-finish, /hilbana-plan, /hilbana-review) + Hilbana's MCP server auto-registered. Commands and skills are written in Spanish.",
   "author": { "name": "Hilbana" },
   "license": "MIT",
   "keywords": ["hilbana", "memoria", "memory", "agents", "framework", "mcp", "workflow", "orchestration", "engram"],
@@ -13,15 +13,15 @@
   "userConfig": {
     "api_key": {
       "type": "string",
-      "title": "API key de Hilbana",
-      "description": "Créala en Ajustes → API keys del workspace que uses (formato hil_…). Las tools y la memoria operan sobre el workspace de ESTA key: usa una del workspace en el que trabajas.",
+      "title": "Hilbana API key",
+      "description": "Create it under Settings → API keys in the workspace you work in (format hil_…). The tools and the memory operate on THAT key's workspace, so use a key from the right one.",
       "sensitive": true,
       "required": true
     },
     "base_url": {
       "type": "string",
-      "title": "URL de Hilbana",
-      "description": "Base del despliegue, sin /mcp.",
+      "title": "Hilbana URL",
+      "description": "Base URL of your deployment, without /mcp.",
       "default": "https://app.hilbana.com"
     }
   }

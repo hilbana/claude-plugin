@@ -1,103 +1,108 @@
 # hilbana
 
-Plugin **todo-en-uno** de Claude Code para [Hilbana](https://app.hilbana.com): con
-una sola instalación tus agentes tienen **memoria persistente** y el **framework de
-trabajo humano + agente**.
+The **all-in-one** Claude Code plugin for [Hilbana](https://app.hilbana.com): one
+install gives your agents **persistent memory** and the **human+agent workflow
+framework**.
 
-## Qué trae
+> **Language note:** the commands and skills in this plugin are written in
+> **Spanish**. Claude reads them fine and answers you in whatever language you're
+> using, so this doesn't affect how you work — but if you open the files to edit
+> them, the prose inside is Spanish.
 
-- **MCP de Hilbana auto-registrado** (con tu API key vía la config del plugin).
-- **Memoria por proyecto** (reemplazo de engram):
-  - Hook `SessionStart`: al abrir un repo, recuerda cargar el contexto previo
-    (`mem_context`) y guardar proactivamente.
-  - Hook `SessionEnd`: al cerrar la sesión, guarda automáticamente un resumen de lo
-    trabajado.
-  - Command `/hilbana-memoria-switch` para importar tu histórico de engram.
-- **Contabilidad de tokens por tarea**:
-  - Hook `Stop` / `SessionEnd`: reporta automáticamente los tokens que ha gastado el
-    agente y los imputa a la issue que tiene reclamada. Ver *Consumo de tokens* abajo.
-- **Framework de trabajo humano + agente** (cola *pull*): los commands del ciclo
-  `/hilbana-claim-next`, `/hilbana-finish`, `/hilbana-plan`, `/hilbana-review`. El
-  worker tira de la cola y deja *En revisión*; el revisor cierra.
-- **Skills** `hilbana-memoria` (protocolo de memoria) y `hilbana-mcp` (las tools del
-  MCP y los flujos de la cola).
+## What you get
 
-La memoria se organiza por **scope = el nombre de la carpeta del repo**. Funciona en
-**cualquier** repo, no solo en proyectos del gestor.
+- **Hilbana's MCP server auto-registered** (with your API key, via the plugin config).
+- **Per-project memory** (an engram replacement):
+  - `SessionStart` hook: when you open a repo, it reminds the agent to load prior
+    context (`mem_context`) and to save proactively.
+  - `SessionEnd` hook: on close, it automatically saves a summary of the session.
+  - `/hilbana-memoria-switch` to import your engram history.
+- **Per-task token accounting**:
+  - `Stop` / `SessionEnd` hooks report the tokens the agent spent and bill them to
+    the issue it has claimed. See *Token accounting* below.
+- **The human+agent workflow framework** (a *pull* queue): the cycle commands
+  `/hilbana-claim-next`, `/hilbana-finish`, `/hilbana-plan`, `/hilbana-review`. The
+  worker pulls from the queue and stops at *In Review*; the reviewer closes.
+- **Skills** `hilbana-memoria` (the memory protocol) and `hilbana-mcp` (the MCP tools
+  and the queue flows).
 
-## Requisitos
+Memory is organised by **scope = the name of the repo folder**. It works in **any**
+repo, not just projects tracked in Hilbana.
 
-- **Node 18+** en el `PATH` (los hooks corren con `node`; el `SessionEnd` usa
-  `fetch` global, disponible desde Node 18). Sin Node los hooks no se ejecutan,
-  pero la sesión no se rompe.
+## Requirements
 
-## Instalación
+- **Node 18+** on your `PATH` (the hooks run under `node`; `SessionEnd` uses the
+  global `fetch`, available from Node 18 on). Without Node the hooks simply don't
+  run — your session is unaffected.
+
+## Install
 
 ```bash
-# 1) Añade este repo como marketplace
+# 1) Add this repo as a marketplace
 /plugin marketplace add hilbana/claude-plugin
 
-# 2) Instala el plugin
+# 2) Install the plugin
 /plugin install hilbana@hilbana
 ```
 
-Al instalar te pedirá la **configuración** (`userConfig`):
+On install you'll be asked for the **configuration** (`userConfig`):
 
-- **`api_key`** (obligatoria): créala en *Ajustes → API keys* del **workspace que
-  uses**. ⚠️ Las tools y la memoria operan sobre el workspace de esta key; usa una
-  del workspace correcto o caerán en otro tenant.
-- **`base_url`** (opcional): déjala **vacía** para el default `https://app.hilbana.com`.
-  Ponla solo en self-hosted, **sin `/mcp`** (el plugin lo añade).
+- **`api_key`** (required): create it under *Settings → API keys* in **the workspace
+  you work in**. ⚠️ The tools and the memory operate on that key's workspace — use a
+  key from the right one or they'll land in another tenant.
+- **`base_url`** (optional): leave it **empty** for the default
+  `https://app.hilbana.com`. Set it only when self-hosting, and **without `/mcp`**
+  (the plugin appends it).
 
-Reinicia Claude Code y listo: el MCP queda conectado, los hooks activos y los
-commands del ciclo disponibles en todos tus repos.
+Restart Claude Code and you're set: the MCP is connected, the hooks are live and the
+cycle commands are available across all your repos.
 
-## Verificación
+## Verify
 
-- `/plugin list` → `hilbana` habilitado.
-- En una sesión nueva, comprueba que existen las tools de memoria
-  (`mem_context`, `mem_save`, …). Con el plugin llevan el prefijo del servidor MCP
-  namespaced: `mcp__plugin_hilbana_hilbana__mem_*`.
-- Prueba: *"carga el contexto de memoria"* → el agente llama `mem_context` con el
-  scope del repo actual.
+- `/plugin list` → `hilbana` enabled.
+- In a fresh session, check that the memory tools exist (`mem_context`, `mem_save`,
+  …). Installed as a plugin they carry the namespaced MCP prefix:
+  `mcp__plugin_hilbana_hilbana__mem_*`.
+- Smoke test: ask *"load the memory context"* → the agent calls `mem_context` with
+  the current repo's scope.
 
-## Consumo de tokens
+## Token accounting
 
-El plugin mide **cuántos tokens cuesta cada tarea** y lo manda solo, sin que el
-agente tenga que acordarse de nada. Es deliberado: un LLM no sabe lo que consume, y
-si se le pide que lo reporte se lo inventa.
+The plugin measures **how many tokens each task costs** and sends that on its own,
+without the agent having to remember anything. That's deliberate: an LLM doesn't know
+what it consumes, and if you ask it to report that, it makes it up.
 
-Cómo funciona: en cada `Stop` (y al cerrar la sesión) el hook
-`scripts/usage-report.cjs` recorre el transcript en streaming, **deduplica por
-`message.id`** —el mismo mensaje aparece en varias líneas del JSONL, y sumar por
-línea infla la cifra ~80%—, agrupa por modelo y manda a `POST /api/agents/usage`
-solo lo posterior al último tramo enviado. **La issue no se manda**: el servidor
-decide a qué tarea imputarlo mirando qué issue tienes reclamada en ese momento
-(`claim_issue`). Sin claim, el gasto queda como *consumo no imputado*.
+How it works: on every `Stop` (and on session close) the `scripts/usage-report.cjs`
+hook streams through the transcript, **deduplicates by `message.id`** — the same
+message appears on several JSONL lines, and summing per line inflates the figure by
+~80% — groups by model, and posts to `POST /api/agents/usage` only what came after
+the last reported segment. **The issue is not sent**: the server decides which task
+to bill by looking at which issue you have claimed at that moment (`claim_issue`).
+With no claim, the spend is recorded as *unattributed*.
 
-Es silencioso por diseño: si el endpoint está caído, la key falta o el transcript no
-se puede leer, no rompe ni ensucia tu sesión. El cursor solo avanza cuando el
-servidor confirma, así que un tramo no enviado se reintenta en el siguiente turno y
-no se pierde.
+It's silent by design: if the endpoint is down, the key is missing or the transcript
+can't be read, it neither breaks nor pollutes your session. The cursor only advances
+once the server confirms, so an unsent segment is retried on the next turn rather
+than lost.
 
-Modo prueba: `HILBANA_HOOK_DRYRUN=1` imprime el payload en vez de enviarlo.
+Dry run: `HILBANA_HOOK_DRYRUN=1` prints the payload instead of sending it.
 
-### Contrato de la ingesta (para otros agentes)
+### The ingest contract (for other agents)
 
-El endpoint **no es específico de Claude Code**: cualquier agente (Codex, Cursor, uno
-propio) puede alimentarlo mandando este cuerpo con su propio `agentName`.
+The endpoint is **not specific to Claude Code**: any agent (Codex, Cursor, your own)
+can feed it by posting this body with its own `agentName`.
 
 ```http
 POST /api/agents/usage
-Authorization: Bearer hil_<tu-api-key>
+Authorization: Bearer hil_<your-api-key>
 Content-Type: application/json
 ```
 
 ```json
 {
-  "sessionId": "identificador estable de la sesión del agente",
+  "sessionId": "stable identifier for the agent's session",
   "agentName": "claude-code",
-  "cursor": "id del último mensaje incluido en este tramo",
+  "cursor": "id of the last message included in this segment",
   "usage": [
     {
       "model": "claude-opus-4-8",
@@ -110,27 +115,26 @@ Content-Type: application/json
 }
 ```
 
-Reglas del contrato:
+Contract rules:
 
-- **`cursor` es obligatorio** y es lo que hace la ingesta idempotente: reenviar el
-  mismo cursor responde `{"accepted": false}` y no suma nada. Manda como cursor el id
-  del último mensaje que has contabilizado, y avánzalo solo cuando el servidor
-  responda 200.
-- **Manda tramos, no totales**: cada envío son los contadores *nuevos* desde el
-  cursor anterior; el servidor acumula.
-- Los cuatro contadores van **separados**. No los sumes en uno: las lecturas de caché
-  dominan el volumen y cuestan una fracción, así que un total único es una cifra
-  engañosa. Los ausentes cuentan como 0.
-- `issueId` y `workspaceId` **no se aceptan** en el cuerpo: salen de la API key y del
-  claim vivo. Es lo que impide imputar gasto a una tarea ajena.
-- Respuesta: `{ "accepted": true|false, "issueId": string|null, "models": number }`.
-- Una key `read-only` recibe 403; contadores negativos o sin `model`, 400.
+- **`cursor` is required** and it's what makes the ingest idempotent: replaying the
+  same cursor returns `{"accepted": false}` and adds nothing. Send the id of the last
+  message you accounted for, and only advance it once the server answers 200.
+- **Send segments, not totals**: each post carries the *new* counters since the
+  previous cursor; the server accumulates.
+- The four counters stay **separate**. Don't collapse them into one: cache reads
+  dominate the volume and cost a fraction, so a single total is a misleading number.
+  Missing counters count as 0.
+- `issueId` and `workspaceId` are **not accepted** in the body: they come from the API
+  key and the live claim. That's what stops spend being billed to someone else's task.
+- Response: `{ "accepted": true|false, "issueId": string|null, "models": number }`.
+- A `read-only` key gets 403; negative counters or a missing `model`, 400.
 
-## Privacidad
+## Privacy
 
-El plugin **no contiene secretos**: tu API key vive solo en tu configuración local
-(`userConfig`, marcada `sensitive`). El hook `SessionEnd` envía el resumen a tu
-Hilbana vía `POST /api/memory` autenticado con esa key.
+The plugin contains **no secrets**: your API key lives only in your local
+configuration (`userConfig`, marked `sensitive`). The `SessionEnd` hook sends the
+summary to your Hilbana via `POST /api/memory`, authenticated with that key.
 
-Modo prueba del guardado: `HILBANA_HOOK_DRYRUN=1` hace que el hook imprima el
-resumen en vez de enviarlo.
+Dry run for the memory save: `HILBANA_HOOK_DRYRUN=1` makes the hook print the summary
+instead of sending it.

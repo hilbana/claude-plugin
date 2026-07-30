@@ -1,6 +1,6 @@
 ---
-description: Guía el switch desde engram a la memoria de Hilbana (mismo MCP, tools mem_*). Convivencia, configuración en ~/.claude y retirada de engram. Lo prueba en el repo actual.
-argument-hint: "[url-base opcional, p.ej. https://app.hilbana.com]"
+description: "Walks through switching from engram to Hilbana's agent memory (same MCP, mem_* tools). Covers running both side by side, the ~/.claude config and retiring engram, and tests it against the current repo."
+argument-hint: "[optional base url, e.g. https://app.hilbana.com]"
 ---
 
 # Switch desde engram a la memoria de Hilbana

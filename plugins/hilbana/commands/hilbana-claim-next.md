@@ -1,6 +1,6 @@
 ---
-description: El worker tira de la cola "lista para agente" de Hilbana — pide la siguiente issue lista (next_ready_issue), la reclama y la arranca (In Progress), y te muestra su agentContext/DoD para empezar. Consumidor puro de la cola, sin elegir a mano.
-argument-hint: "[projectId opcional]  (UUID de proyecto para acotar la cola; vacío = todos tus teams)"
+description: "Pull the next agent-ready issue from Hilbana's queue: next_ready_issue claims it atomically, moves it to In Progress and shows its agentContext/DoD so you can start. A pure queue consumer — no picking issues by hand."
+argument-hint: "[optional projectId]  (project UUID to narrow the queue; empty = all your teams)"
 ---
 
 # Reclamar la siguiente issue lista de Hilbana

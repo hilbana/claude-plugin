@@ -1,6 +1,6 @@
 ---
-description: Bootstrap de la documentación de un proyecto en Hilbana — lee el CLAUDE.md y el contexto local, entrevista al usuario y escribe los docs iniciales con save_doc (siempre tras revisión).
-argument-hint: "[proyecto destino: nombre o id del project de Hilbana; si falta, se elige/crea]"
+description: "Bootstrap a project's documentation in Hilbana — reads CLAUDE.md and the local context, interviews the user and writes the initial docs with save_doc (always after review)."
+argument-hint: "[target project: Hilbana project name or id; if missing, one is picked or created]"
 ---
 
 # Crear los docs iniciales de un proyecto en Hilbana

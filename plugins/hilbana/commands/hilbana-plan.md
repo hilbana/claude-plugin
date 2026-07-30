@@ -1,6 +1,6 @@
 ---
-description: El orquestador del framework humano+agente. Convierte un objetivo (épica o milestone) en un DAG de sub-issues con DoR completa, lo encola marcando agentReady, y (fase 2) dirige workers en oleadas con worktrees aislados hasta cerrarlo. /plan es un compilador objetivo→grafo; el tracker es el scheduler; los workers son un pool work-stealing.
-argument-hint: "<identificador de épica | id de milestone | objetivo en texto>"
+description: "The orchestrator of the human+agent framework. Compiles a goal (epic or milestone) into a DAG of sub-issues with a complete DoR, queues the frontier by setting agentReady, and (phase 2) drives workers in waves inside isolated worktrees until it's done. /plan is a goal-to-graph compiler; the tracker is the scheduler; the workers are a work-stealing pool."
+argument-hint: "<epic identifier | milestone id | goal in plain text>"
 ---
 
 # /hilbana-plan — el orquestador
