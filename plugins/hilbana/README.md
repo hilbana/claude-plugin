@@ -29,6 +29,9 @@ framework**.
 Memory is organised by **scope = the name of the repo folder**. It works in **any**
 repo, not just projects tracked in Hilbana.
 
+For each command, skill and hook in detail — arguments, the MCP tools they use, the
+rules they follow — see **[REFERENCE.md](../../REFERENCE.md)**.
+
 ## Requirements
 
 - **Node 18+** on your `PATH` (the hooks run under `node`; `SessionEnd` uses the

@@ -19,8 +19,14 @@ Restart Claude Code. On install you'll be asked for your Hilbana **API key**
 (format `hil_…`, created under *Settings → API keys* in your workspace) and,
 optionally, a **base URL** if you self-host.
 
-Full details — what's included, requirements, verification, token accounting and
-privacy — are in the [plugin README](plugins/hilbana/README.md).
+## Documentation
+
+- **[REFERENCE.md](REFERENCE.md)** — every command, skill and hook in detail: what
+  each one does, its arguments, the MCP tools it uses and the rules it follows. The
+  source of truth if you're using the plugin day to day.
+- [Plugin README](plugins/hilbana/README.md) — what's included, requirements,
+  verification, token accounting and privacy.
+- [CHANGELOG](CHANGELOG.md) — what changed in each version.
 
 ## What's in here
 

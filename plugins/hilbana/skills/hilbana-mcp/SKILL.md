@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 26 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 28 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP, autenticado con una API key
+multi-agente) por MCP sobre HTTP (28 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.

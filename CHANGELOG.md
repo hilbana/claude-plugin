@@ -4,6 +4,20 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [1.3.1] — 2026-07-30
+
+### Added
+
+- **`REFERENCE.md`** — full reference for the seven commands, two skills and three
+  hooks: what each does, its arguments, the MCP tools it uses and the rules it
+  follows, plus the workflow they implement, the configuration fields and the tool
+  naming. Linked from both READMEs.
+
+### Fixed
+
+- The `hilbana-mcp` skill claimed **26** MCP tools; the MCP exposes **28**, which is
+  also what the skill's own groups added up to. Corrected.
+
 ## [1.3.0] — 2026-07-30
 
 ### Changed
