@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 28 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 29 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (28 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (29 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -63,7 +63,7 @@ search_issues { "query": "webhooks salientes", "limit": 10 }
 
 ## 2) Descubrimiento — resolver IDs antes de escribir
 
-Sin estado, no escribes. Estas 5 tools convierten "nombres humanos" en IDs.
+Sin estado, no escribes. Estas 6 tools convierten "nombres humanos" en IDs.
 
 | Tool | Devuelve | Lo necesitas para |
 |------|----------|-------------------|
@@ -72,6 +72,7 @@ Sin estado, no escribes. Estas 5 tools convierten "nombres humanos" en IDs.
 | `list_labels` | labels (id, nombre, color) | `labelIds` / `addLabelIds` / `removeLabelIds` |
 | `list_milestones` | milestones (id, nombre, proyecto) | `milestoneId` |
 | `list_cycles` | cycles (id, número, proyecto, fechas) | asignar issue a un cycle |
+| `list_custom_fields` | campos personalizados del workspace (id, nombre, **type**, orden) | el mapa `customFields` de `save_issue` |
 
 **Patrón típico (crear issue):**
 ```
@@ -79,7 +80,46 @@ list_projects            -> projectId
 list_workflow_states     -> stateId del estado "Todo"/"Backlog" (mira el type)
 list_members             -> assigneeId (opcional)
 list_labels              -> labelIds (opcional)
+list_custom_fields       -> fieldId de cada campo propio del workspace (opcional)
 // y ya tienes todo para save_issue
+```
+
+### Campos personalizados
+
+Un workspace puede definir sus propios campos (cliente, importe, fecha de entrega,
+facturado…) desde Ajustes. **Son del workspace, no del proyecto**: un workspace
+puede tener diez y otro ninguno. Cinco tipos, y cada uno espera un valor distinto:
+
+| `type` | Valor que espera | Ejemplo |
+|--------|------------------|---------|
+| `text` | string | `"Acme S.L."` |
+| `number` | número (admite decimales y negativos) | `-1234.56` |
+| `date` | epoch ms | `1789423200000` |
+| `checkbox` | booleano | `true` |
+| `member` | id de un miembro del workspace | `"<userId>"` |
+
+- `list_custom_fields` te da los `id`. Por defecto **no** incluye los archivados
+  (`includeArchived: true` si los quieres ver).
+- Se escriben con `save_issue` y el mapa `customFields: { "<fieldId>": valor }`,
+  tanto al crear como al actualizar. **`null` borra el valor** (que no es lo mismo
+  que `0` o `false`: es "sin rellenar").
+- `get_issue` los devuelve en `customFields`, ya resueltos y con su nombre y tipo,
+  así que no tienes que cruzar con `list_custom_fields` para leerlos.
+- El tipo se valida **contra la definición**: meter un texto en un campo `number`
+  falla con un error claro en vez de guardarse torcido. No adivines el tipo, léelo
+  de `list_custom_fields`.
+
+```
+list_custom_fields
+// -> [{ "id": "<f1>", "name": "Cliente", "type": "text" },
+//     { "id": "<f2>", "name": "Importe", "type": "number" }]
+
+save_issue {
+  "id": "ABC-123",
+  "customFields": { "<f1>": "Acme S.L.", "<f2>": -1234.56 }
+}
+
+save_issue { "id": "ABC-123", "customFields": { "<f1>": null } }   // borra el valor
 ```
 
 ---
@@ -111,7 +151,7 @@ save_doc { "projectId": "<id>", "title": "Decisiones de auth",
 
 | Tool | Para qué | Notas |
 |------|----------|-------|
-| `save_issue` | Crea (sin `id`) o actualiza (con `id`) una issue | Sin `id`: `teamId`+`title`+`stateId` obligatorios. Admite `description`, `agentContext`, `assigneeId`, `projectId`, `milestoneId`, `dueDate` (epoch ms), `parentId` (sub-issue), `labelIds`. En update: `addLabelIds`/`removeLabelIds`, `dueDate:null` limpia |
+| `save_issue` | Crea (sin `id`) o actualiza (con `id`) una issue | Sin `id`: `teamId`+`title`+`stateId` obligatorios. Admite `description`, `agentContext`, `assigneeId`, `projectId`, `milestoneId`, `dueDate` (epoch ms), `parentId` (sub-issue), `labelIds`. En update: `addLabelIds`/`removeLabelIds`, `dueDate:null` limpia. `customFields` escribe campos personalizados (ver §2) |
 | `change_issue_state` | Mueve una issue de estado | Setea started_at/completed_at/canceled_at según el `type` del nuevo estado |
 | `add_comment` | Comenta una issue (markdown) | Admite menciones `@[Nombre](user:UUID)`; autoría = usuario de la key |
 | `link_issues` | Relaciona dos issues | `type`: `blocks` / `blocked_by` / `relates`. Idempotente |

@@ -27,7 +27,7 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | [`/hilbana-trabajar-issue`](#hilbana-trabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana-crear-docs`](#hilbana-crear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
 | [`/hilbana-memoria-switch`](#hilbana-memoria-switch) | command | Move your agent memory from engram to Hilbana |
-| [`hilbana-mcp`](#hilbana-mcp) | skill | All 28 MCP tools: when to use each, with examples |
+| [`hilbana-mcp`](#hilbana-mcp) | skill | All 29 MCP tools: when to use each, with examples |
 | [`hilbana-memoria`](#hilbana-memoria) | skill | The proactive memory protocol (scope, when to save, what not to) |
 | [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope |
 | [`Stop`](#stop--sessionend-usage) | hook | Reports token spend, billed to your claimed issue |
