@@ -4,6 +4,29 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [1.4.0] — 2026-07-30
+
+### Added
+
+- **Custom fields in the `hilbana-mcp` skill** (29 tools, was 28). A workspace can
+  define its own fields — client, amount, delivery date, invoiced… — and agents can
+  now read and write them:
+  - `list_custom_fields` joins the discovery group: it returns each field's `id`,
+    `name` and `type` (archived ones only with `includeArchived: true`).
+  - `save_issue` takes a `customFields: { "<fieldId>": value }` map on create and on
+    update; `null` clears a value (which is not the same as `0` or `false`).
+  - `get_issue` returns the values already resolved, with name and type, so there is
+    no need to cross-reference `list_custom_fields` just to read them.
+  - The skill documents the value each `type` expects (epoch ms for `date`, a member
+    id for `member`…) and warns that the type is validated against the definition:
+    a string in a `number` field fails loudly instead of being stored wrong.
+- **Searching by custom fields in `search_issues`.** It is now full-text over the
+  text fields too, and it takes `customFields: [{fieldId, op, value}]` to narrow by
+  value, combined in AND with the text query (`query: ""` makes it a filtered list).
+  The skill documents the operators per type — `empty` means *no value*, so a
+  checkbox set to `false` is not `empty` — and notes that results carry each issue's
+  `customFields`, so there is no need to fetch them one by one afterwards.
+
 ## [1.3.2] — 2026-07-30
 
 ### Added
