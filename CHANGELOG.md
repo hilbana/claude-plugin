@@ -4,7 +4,7 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
-## [1.4.0] — 2026-07-31
+## [1.4.1] — 2026-07-31
 
 ### Added
 
@@ -14,7 +14,19 @@ criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
   `name`) and updates (`name`, `description`, `targetDate`; `null` clears). It does
   not move a milestone between projects and does not delete — deleting drags the
   assigned issues along and stays UI-only.
-- **Custom fields in the `hilbana-mcp` skill** (29 tools at the time, 28 before). A workspace can
+
+### Documented
+
+- **`save_issue`'s `milestoneId`** now says out loud what it does: it puts the issue
+  in a milestone of the **same** project (`null` takes it out). Two traps the skill
+  now warns about: a milestone from another project is rejected, and changing
+  `projectId` clears the milestone unless you pass a new one in the same call.
+
+## [1.4.0] — 2026-07-30
+
+### Added
+
+- **Custom fields in the `hilbana-mcp` skill** (29 tools, was 28). A workspace can
   define its own fields — client, amount, delivery date, invoiced… — and agents can
   now read and write them:
   - `list_custom_fields` joins the discovery group: it returns each field's `id`,
@@ -32,13 +44,6 @@ criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
   The skill documents the operators per type — `empty` means *no value*, so a
   checkbox set to `false` is not `empty` — and notes that results carry each issue's
   `customFields`, so there is no need to fetch them one by one afterwards.
-
-### Documented
-
-- **`save_issue`'s `milestoneId`** now says out loud what it does: it puts the issue
-  in a milestone of the **same** project (`null` takes it out). Two traps the skill
-  now warns about: a milestone from another project is rejected, and changing
-  `projectId` clears the milestone unless you pass a new one in the same call.
 
 ## [1.3.2] — 2026-07-30
 
