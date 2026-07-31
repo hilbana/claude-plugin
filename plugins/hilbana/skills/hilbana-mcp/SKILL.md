@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 29 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 30 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (29 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (30 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -185,6 +185,7 @@ save_doc { "projectId": "<id>", "title": "Decisiones de auth",
 | `link_issues` | Relaciona dos issues | `type`: `blocks` / `blocked_by` / `relates`. Idempotente |
 | `unlink_issues` | Borra una relación por `relationId` | El `relationId` sale de `get_issue`/`link_issues` |
 | `save_project` | Crea un project | Falla si la key está acotada a un proyecto |
+| `save_milestone` | Crea (sin `id`) o actualiza (con `id`) un milestone | Al crear: `projectId`+`name`. Edita `name`/`description`/`targetDate` (epoch ms, `null` limpia). NO mueve el milestone de proyecto y NO borra (borrar es solo por UI). Para meterle issues: `save_issue` con `milestoneId` |
 
 **Ejemplo — crear una issue completa para otro agente:**
 ```
@@ -353,3 +354,7 @@ cierra a Done en el paso 7.
 - **Tools de escritura ausentes**: si no ves `save_issue` y compañía, tu key es
   *read-only* — pide una key con escritura.
 - **`dueDate`**: es epoch en **milisegundos**; `null` lo limpia.
+- **Milestone de otro proyecto**: el `milestoneId` de una issue tiene que ser del
+  **mismo** proyecto; si no, `save_issue` falla.
+- **Mover de proyecto borra el milestone**: cambiar `projectId` limpia el
+  `milestoneId` salvo que mandes uno nuevo en la misma llamada.
