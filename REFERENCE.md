@@ -20,9 +20,9 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 
 | Component | Type | One-liner |
 |-----------|------|-----------|
-| [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Pull the next agent-ready issue from the queue and start it |
-| [`finish`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Close your turn on an issue at **In Review**, with telemetry and memory |
-| [`review`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Review what's In Review: approve to Done or send back |
+| [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana-claim-next` | MCP prompt (+ shortcut) | Pull the next agent-ready issue from the queue and start it |
+| [`finish`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana-finish` | MCP prompt (+ shortcut) | Close your turn on an issue at **In Review**, with telemetry and memory |
+| [`review`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana-review` | MCP prompt (+ shortcut) | Review what's In Review: approve to Done or send back |
 | [`/hilbana-plan`](#hilbana-plan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
 | [`/hilbana-trabajar-issue`](#hilbana-trabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana-crear-docs`](#hilbana-crear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
@@ -96,6 +96,17 @@ criterion failed and how to reproduce it rather than "it doesn't work".
 **Don't report tokens in `record_run`**: the plugin's hook measures spend from the
 transcript, and hand-estimating it corrupts the data. That measurement is one of the
 two things that still need the plugin.
+
+#### The `/hilbana-*` shortcuts (2.1.0)
+
+`/mcp__plugin_hilbana_hilbana__finish` is unbearable to type, so since 2.1.0 the
+plugin ships `/hilbana-claim-next`, `/hilbana-finish` and `/hilbana-review` again —
+this time as **~15-line triggers**, not copies. The protocol they follow lives in the
+server's `instructions` and in the prompts themselves; the shortcut only fires it.
+They can't call `prompts/get` (Claude Code doesn't expose it as a tool), which is why
+they restate the steps in one line each instead of delegating.
+
+Without the plugin, use the prompts directly. Nothing is lost but the typing.
 
 ### `/hilbana-plan`
 

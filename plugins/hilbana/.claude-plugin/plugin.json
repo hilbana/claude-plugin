@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "hilbana",
   "displayName": "Hilbana",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Everything Hilbana for Claude Code in one install: persistent per-project agent memory (an engram replacement, with hooks that load context on open and save a summary on close) + the human+agent workflow framework (pull queue, the /hilbana-plan orchestrator, and the cycle prompts claim_next/finish/review served by the MCP itself) + Hilbana's MCP server auto-registered. Commands and skills are written in Spanish.",
   "author": { "name": "Hilbana" },
   "license": "MIT",
