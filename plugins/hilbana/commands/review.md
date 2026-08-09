@@ -3,7 +3,7 @@ description: "Shortcut for the review prompt: take Hilbana issues sitting In Rev
 argument-hint: "[ABC-123 | projectId]  (one issue or a project; empty = the whole In Review queue)"
 ---
 
-# /hilbana-review — revisar lo que está En revisión
+# /hilbana:review — revisar lo que está En revisión
 
 Atajo del prompt **`review`** que sirve el MCP de Hilbana, para no teclear
 `/mcp__plugin_hilbana_hilbana__review`. El protocolo canónico llega en las

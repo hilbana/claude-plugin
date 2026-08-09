@@ -3,7 +3,7 @@ description: "Shortcut for the finish prompt: close your turn on a Hilbana issue
 argument-hint: "<ABC-123>  (issue you're finishing; empty = the one you claimed)"
 ---
 
-# /hilbana-finish — cerrar el turno como worker
+# /hilbana:finish — cerrar el turno como worker
 
 Atajo del prompt **`finish`** que sirve el MCP de Hilbana, para no teclear
 `/mcp__plugin_hilbana_hilbana__finish`. El protocolo canónico y su detalle llegan en

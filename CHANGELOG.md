@@ -4,6 +4,20 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.2.0] — 2026-08-09
+
+### Changed
+
+- **The shortcuts are now `/hilbana:claim-next`, `/hilbana:finish` and
+  `/hilbana:review`** (was `/hilbana-claim-next` and friends). Claude Code namespaces
+  plugin commands with the plugin name, so `hilbana-finish.md` was answering to
+  `/hilbana:hilbana-finish` — "hilbana" twice. Naming the file `finish.md` gets you
+  `/hilbana:finish`.
+
+  By the letter of the versioning rules this is a rename and therefore a major, but
+  the 2.1.0 names existed for about half an hour and nobody had them in their fingers
+  yet. Shipped as a minor on purpose.
+
 ## [2.1.0] — 2026-08-09
 
 ### Added

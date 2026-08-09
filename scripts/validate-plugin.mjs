@@ -218,8 +218,12 @@ else {
 
 if (hay("REFERENCE.md")) {
   const ref = leer("REFERENCE.md");
+  // Claude Code antepone el nombre del plugin a sus commands (`/hilbana:finish`), así
+  // que la forma con namespace vale igual que la desnuda: documentar `/finish` a secas
+  // sería documentar algo que el usuario no puede teclear.
   for (const c of componentes.commands)
-    if (!ref.includes(`/${c}`)) fallo("REFERENCE.md", `no documenta el command \`/${c}\``);
+    if (!ref.includes(`/${c}`) && !ref.includes(`/hilbana:${c}`))
+      fallo("REFERENCE.md", `no documenta el command \`/hilbana:${c}\``);
   for (const s of componentes.skills)
     if (!ref.includes(s)) fallo("REFERENCE.md", `no documenta la skill \`${s}\``);
   // Y al revés: que no prometa commands que ya no existen.

@@ -3,7 +3,7 @@ description: "Shortcut for the claim_next prompt: pull the next agent-ready issu
 argument-hint: "[projectId]  (narrows the queue to one project; empty = all your teams)"
 ---
 
-# /hilbana-claim-next — tirar de la cola
+# /hilbana:claim-next — tirar de la cola
 
 Atajo del prompt **`claim_next`** que sirve el MCP de Hilbana, para no teclear
 `/mcp__plugin_hilbana_hilbana__claim_next`. El protocolo canónico llega en las
@@ -20,4 +20,4 @@ Eres un **worker**: no eliges la issue a mano, tiras de la cola.
 4. **`get_issue`** y muestra el `agentContext`, la DoD y el `verifyCommand` antes de
    empezar. Un `blocked_by` abierto es señal de PARAR: comenta y libera.
 
-Al terminar, cierra con **`/hilbana-finish`**.
+Al terminar, cierra con **`/hilbana:finish`**.
