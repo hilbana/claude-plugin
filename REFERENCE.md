@@ -20,9 +20,9 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 
 | Component | Type | One-liner |
 |-----------|------|-----------|
-| [`/hilbana-claim-next`](#hilbana-claim-next) | command | Pull the next agent-ready issue from the queue and start it |
-| [`/hilbana-finish`](#hilbana-finish) | command | Close your turn on an issue at **In Review**, with telemetry and memory |
-| [`/hilbana-review`](#hilbana-review) | command | Review what's In Review: approve to Done or send back |
+| [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Pull the next agent-ready issue from the queue and start it |
+| [`finish`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Close your turn on an issue at **In Review**, with telemetry and memory |
+| [`review`](#the-cycle-now-lives-in-the-mcp-server) | MCP prompt | Review what's In Review: approve to Done or send back |
 | [`/hilbana-plan`](#hilbana-plan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
 | [`/hilbana-trabajar-issue`](#hilbana-trabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana-crear-docs`](#hilbana-crear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
@@ -44,15 +44,15 @@ tasks by hand and never talk to each other. The issue graph is the only channel.
 /hilbana-plan          goal ──> DAG of sub-issues, frontier marked agentReady
                                             │
                                             ▼
-/hilbana-claim-next    worker pulls the next ready leaf (atomic, claimed on serve)
+claim_next  (prompt)   worker pulls the next ready leaf (atomic, claimed on serve)
                                             │
                                        … work happens …
                                             │
                                             ▼
-/hilbana-finish        verify DoD ──> In Review (never Done) + record_run + mem_save
+finish      (prompt)   verify DoD ──> In Review (never Done) + record_run + mem_save
                                             │
                                             ▼
-/hilbana-review        reviewer: Done ✔  or  back to In Progress with feedback
+review      (prompt)   reviewer: Done ✔  or  back to In Progress with feedback
 ```
 
 Two rules hold the whole thing together:
@@ -65,90 +65,37 @@ Two rules hold the whole thing together:
 `/hilbana-trabajar-issue` is the exception: a single-issue flow that does close to
 Done, for when you're driving one task by hand rather than draining a queue.
 
+The three cycle steps are **MCP prompts**, not commands — see
+[The cycle now lives in the MCP server](#the-cycle-now-lives-in-the-mcp-server).
+
 ---
 
 ## Commands
 
-### `/hilbana-claim-next`
+### The cycle now lives in the MCP server
 
-**Pull the next agent-ready issue and start it.** A pure queue consumer.
+`claim_next`, `finish` and `review` used to be the commands `hilbana-claim-next`,
+`hilbana-finish` and `hilbana-review`. **They were removed in 2.0.0** and are now
+**MCP prompts served by Hilbana itself**, so they work in any MCP client and update
+when the server does — no plugin release needed. In Claude Code they show up as
+`/mcp__<server>__<name>`; with this plugin installed the server is registered as
+`plugin_hilbana_hilbana`, so the finish prompt is
+`/mcp__plugin_hilbana_hilbana__finish`.
 
-| | |
-|---|---|
-| **Argument** | `[projectId]` — optional. Narrows the queue to one project; empty = all your teams in the active workspace. |
-| **MCP tools** | `mem_context`, `next_ready_issue`, `list_workflow_states`, `change_issue_state`, `get_issue`, `list_docs`, `get_doc` |
-| **Pairs with** | `/hilbana-finish` |
+| Prompt | Argument | What it does |
+|--------|----------|--------------|
+| `claim_next` | `[projectId]` — narrows the queue; empty = all your teams | `mem_context` → `next_ready_issue` (atomic, arrives already claimed) → *In Progress* → `get_issue` for the `agentContext` and DoD. `null` means the queue is empty: it exits clean, with no lock to release. |
+| `finish` | `[issue]` — defaults to the one you claimed | Verify the DoD (nothing advances without green) → *In Review*, **never Done** → `record_run` (always, failures included) → `mem_save` → `add_comment` for the reviewer → `release_issue` (always). |
+| `review` | `[target]` — an issue or a project; empty = the whole queue | Find what's In Review → load it with `get_issue` + `list_comments` → verify the command **and** the diff against every DoD criterion → Done with an approval comment, or back to In Progress with actionable feedback. |
 
-What it does:
+Their rules are worth knowing as a user, because they're what makes the framework
+auditable: a worker never closes its own work to Done, `record_run` and
+`release_issue` run on every path including failure, and a returned review says which
+criterion failed and how to reproduce it rather than "it doesn't work".
 
-1. Loads memory for the repo's scope, so you don't rediscover conventions.
-2. Calls `next_ready_issue`, which returns the first issue that is `agentReady`,
-   unlocked, not started, not an epic and **has no open blockers** — ordered by
-   priority then FIFO. The queue is atomic (`SELECT … FOR UPDATE SKIP LOCKED`), so two
-   workers calling at once never get the same issue, and **it arrives already claimed
-   for you**: no extra `claim_issue` needed.
-3. Moves it to *In Progress* if the auto-claim didn't already.
-4. Reads and shows the `agentContext` (files, verification command, DoD) plus any
-   project docs.
-
-Good to know:
-
-- **`null` means the queue is empty.** It exits cleanly; there's no lock to release.
-- If you claim explicitly and get a **409**, another agent has it — ask for the next
-  one rather than retrying.
-- A `blocked_by` that's still open is a **stop signal**: comment and release, don't
-  improvise the dependency.
-
-### `/hilbana-finish`
-
-**Close your turn as a worker — at *In Review*, never at Done.**
-
-| | |
-|---|---|
-| **Argument** | `<ABC-123>` — the issue you're finishing. Defaults to the one you claimed. |
-| **MCP tools** | `list_workflow_states`, `change_issue_state`, `record_run`, `mem_save`, `add_comment`, `release_issue` |
-| **Pairs with** | `/hilbana-claim-next` |
-
-The sequence, and nothing advances without step 1 passing:
-
-1. **Verify** — run the DoD's verification command (`verifyCommand` / `agentContext`).
-   If it fails, don't move the issue to In Review: fix it, or close as a failure.
-2. **In Review** — the soft gate. If your board has no such state, it closes to Done
-   and says so in the comment.
-3. **`record_run`** — always, including `failure`/`cancelled`. Feeds the run history
-   and the human-vs-agent metrics. **Don't report tokens here**: the hook measures
-   spend from the transcript; hand-estimating it corrupts the data.
-4. **`mem_save`** — the durable lesson (a decision, a root cause, a convention).
-5. **`add_comment`** — what you did, how you verified it, notes for the reviewer.
-6. **`release_issue`** — always, including when you abort.
-
-On failure it still comments, still records the run and still releases; the issue goes
-back to *Todo* (or stays In Progress with a clear note on where you got stuck).
-
-The PR is left **unmerged** on purpose — merging is the reviewer's job.
-
-### `/hilbana-review`
-
-**The reviewer.** Takes what workers left In Review and decides.
-
-| | |
-|---|---|
-| **Argument** | `[ABC-123 \| projectId]` — one issue, or a project to narrow it; empty = the whole In Review queue. |
-| **MCP tools** | `list_workflow_states`, `list_issues`, `get_issue`, `list_comments`, `change_issue_state`, `add_comment`, `save_issue` |
-
-1. Find the In Review issues (a `workflow_state` of type `started`).
-2. Load the issue: `agentContext` (DoD + verification command), the last `record_run`
-   (its `commitRef` is the sha or PR) and the worker's closing comment.
-3. Verify: run the command, read the **diff** — does it do what the issue asked and
-   **only** that? — and check **every** DoD criterion.
-4. Resolve: **Done** with an approval comment, or back to **In Progress** with
-   actionable feedback. Optionally `save_issue { agentReady: true }` to return it to
-   the queue.
-
-Its rules are worth knowing as a user, because they're what makes reviews auditable:
-**leave a comment on both paths**, make returned feedback specific enough to act on
-(which criterion failed and how to reproduce it), and **don't rewrite the work
-yourself** — small fixes aside, the default is to return it.
+**Don't report tokens in `record_run`**: the plugin's hook measures spend from the
+transcript, and hand-estimating it corrupts the data. That measurement is one of the
+two things that still need the plugin.
 
 ### `/hilbana-plan`
 
@@ -200,7 +147,7 @@ children** (it reads `subIssues`, creates only what's missing and fills DoR gaps
 milestones → verify the DoD → final state → `release_issue`.
 
 Unlike the worker flow, **this one does close to Done**. Use it when you're driving a
-single task deliberately; use `/hilbana-claim-next` + `/hilbana-finish` when you're
+single task deliberately; use the `claim_next` + `finish` prompts when you're
 draining a queue under the review gate.
 
 It doubles as a tour of the UI: the claim lights up a green 🤖 *"in progress by …"*

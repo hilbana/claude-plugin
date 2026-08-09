@@ -79,7 +79,8 @@ the release publishes itself.
 | Renaming or removing a command/skill, changing the name or meaning of a `userConfig` field, or anything that forces users to touch their setup | **major** (1.3.0 → 2.0.0) |
 
 A plugin has no API to break, but it does have muscle memory: if someone has
-`/hilbana-finish` in their fingers and it disappears, that's a major.
+`/hilbana-plan` in their fingers and it disappears, that's a major. That rule is
+what made the 2.0.0 release a major: the cycle commands moved to the MCP server.
 
 ## Privacy
 

@@ -20,9 +20,11 @@ framework**.
 - **Per-task token accounting**:
   - `Stop` / `SessionEnd` hooks report the tokens the agent spent and bill them to
     the issue it has claimed. See *Token accounting* below.
-- **The human+agent workflow framework** (a *pull* queue): the cycle commands
-  `/hilbana-claim-next`, `/hilbana-finish`, `/hilbana-plan`, `/hilbana-review`. The
-  worker pulls from the queue and stops at *In Review*; the reviewer closes.
+- **The human+agent workflow framework** (a *pull* queue): the orchestrator command
+  `/hilbana-plan`, plus the cycle prompts `claim_next`, `finish` and `review` — which
+  since 2.0.0 are served by Hilbana's own MCP, not by this plugin, so they work in any
+  MCP client. The worker pulls from the queue and stops at *In Review*; the reviewer
+  closes.
 - **Skills** `hilbana-memoria` (the memory protocol) and `hilbana-mcp` (the MCP tools
   and the queue flows).
 

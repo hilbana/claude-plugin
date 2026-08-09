@@ -13,7 +13,8 @@ Si tu proyecto tiene docs de metodología o de diseño en Hilbana, **léelos ant
 empezar** (`list_docs` + `get_doc`): mandan sobre lo que dice este command.
 
 Las tools son `mcp__hilbana__<nombre>`; carga la skill **hilbana-mcp** si necesitas
-el detalle. Los workers que lances usan `/hilbana-claim-next` + `/hilbana-finish`.
+el detalle. Los workers que lances usan los prompts `claim_next` + `finish` que
+sirve el propio MCP (en Claude Code, `/mcp__<servidor>__claim_next`).
 
 ## Encuadre (no lo pierdas de vista)
 
@@ -120,7 +121,7 @@ fan-out:
 
 Reglas de oro: los workers **nunca se hablan entre sí**; el grafo es la verdad. Cada
 worker deja su trabajo en **In Review** (gate blando) — lo mergea la
-revisión (`/hilbana-review` o el humano), no el worker.
+revisión (el prompt `review` del MCP o el humano), no el worker.
 
 ## Idempotencia (imprescindible para el modo híbrido)
 

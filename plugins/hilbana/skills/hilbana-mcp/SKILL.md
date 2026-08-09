@@ -277,15 +277,15 @@ release_issue { "id": "<id>" }                // siempre libera, también en fal
 ```
 
 El worker deja la issue en **En revisión** (gate blando) — **no** la
-cierra a Done; eso lo hace el **revisor** (`/hilbana-review` o un humano), que
+cierra a Done; eso lo hace el **revisor** (el prompt `review` o un humano), que
 aprueba a Done o la devuelve a In Progress. Mientras el estado "En revisión" no
 exista en un tablero, se cierra a Done como antes.
 
-Estos loops están envueltos en los **commands del framework**:
-`/hilbana-claim-next` (tira de la cola y arranca), `/hilbana-finish` (deja En
-revisión + `record_run` + `mem_save` + libera), `/hilbana-plan` (orquestador:
-descompone un objetivo en un DAG y dirige workers) y `/hilbana-review` (el revisor
-cierra o devuelve).
+Estos loops están envueltos en los **prompts que sirve el propio MCP**: `claim_next`
+(tira de la cola y arranca), `finish` (deja En revisión + `record_run` + `mem_save` +
+libera) y `review` (el revisor cierra o devuelve). En Claude Code se invocan como
+`/mcp__<servidor>__<nombre>`. El orquestador `/hilbana-plan` sigue siendo un command
+de este plugin.
 
 ---
 
@@ -338,7 +338,7 @@ libera. No cierra su propio trabajo a Done — eso lo hace el revisor.
 9. release_issue { id }                // libera el lock, siempre (también si abortas)
 ```
 
-El **revisor** (`/hilbana-review` o humano) toma las issues En revisión, verifica
+El **revisor** (el prompt `review` o un humano) toma las issues En revisión, verifica
 contra la DoD y las cierra a **Done** o las devuelve a **In Progress** con un
 comentario. Nota: si el estado "En revisión" no existe en tu tablero, el worker
 cierra a Done en el paso 7.

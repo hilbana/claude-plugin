@@ -4,6 +4,29 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.0.0] — 2026-08-09
+
+### Removed (breaking)
+
+- **`/hilbana-claim-next`, `/hilbana-finish` and `/hilbana-review` are gone from the
+  plugin.** The three cycle steps are now **MCP prompts served by Hilbana itself**
+  (`claim_next`, `finish`, `review`), so they work in any MCP client — Cursor, Codex,
+  whatever implements `prompts/list` — and they update when the server does, without
+  a plugin release. In Claude Code they appear as `/mcp__<server>__<name>`; with this
+  plugin installed the server is registered as `plugin_hilbana_hilbana`, so
+  `/hilbana-finish` becomes `/mcp__plugin_hilbana_hilbana__finish`.
+
+  **What you need to do:** relearn three names. Nothing else changes — same steps,
+  same rules, same tools. Your Hilbana instance must be running a build that serves
+  the prompts; if `prompts/list` comes back empty, update the server first.
+
+### Why
+
+The plugin was the only way to get the framework, and that made the framework a
+Claude Code feature rather than a Hilbana one. Prompts, unlike commands, travel with
+the server. What stays here is what genuinely cannot: the hooks that read the local
+transcript (token accounting, session summaries) and the `/hilbana-plan` orchestrator.
+
 ## [1.4.1] — 2026-07-31
 
 ### Added
