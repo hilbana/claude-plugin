@@ -7,7 +7,7 @@
     {
       "name": "hilbana",
       "source": "./plugins/hilbana",
-      "description": "Everything Hilbana in one install: persistent agent memory (an engram replacement, with hooks that load context and save summaries automatically) + the human+agent workflow framework (pull queue, the /hilbana-plan orchestrator, and the cycle prompts claim_next/finish/review served by the MCP itself) + Hilbana's MCP server auto-registered. Commands and skills are written in Spanish."
+      "description": "Everything Hilbana in one install: persistent agent memory (an engram replacement, with hooks that load context and save summaries automatically) + the human+agent workflow framework (pull queue, the /hilbana:plan orchestrator, and the cycle prompts claim_next/finish/review served by the MCP itself) + Hilbana's MCP server auto-registered. Commands and skills are written in Spanish."
     }
   ]
 }

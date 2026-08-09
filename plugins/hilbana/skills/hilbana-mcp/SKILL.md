@@ -284,7 +284,7 @@ exista en un tablero, se cierra a Done como antes.
 Estos loops están envueltos en los **prompts que sirve el propio MCP**: `claim_next`
 (tira de la cola y arranca), `finish` (deja En revisión + `record_run` + `mem_save` +
 libera) y `review` (el revisor cierra o devuelve). En Claude Code se invocan como
-`/mcp__<servidor>__<nombre>`. El orquestador `/hilbana-plan` sigue siendo un command
+`/mcp__<servidor>__<nombre>`. El orquestador `/hilbana:plan` sigue siendo un command
 de este plugin.
 
 ---
@@ -309,7 +309,7 @@ que engram). Aislada por **workspace** (independiente de `projects`).
 
 El **protocolo de uso proactivo** (cuándo guardar/recuperar, cómo derivar el
 scope, convivencia y switch desde engram) está en la skill **`hilbana-memoria`** y
-el command **`/hilbana-memoria-switch`**. Resumen:
+el command **`/hilbana:memoria-switch`**. Resumen:
 ```
 mem_context { "scope": "hilbana" }              // al arrancar
 mem_save    { "scope": "...", "type": "decision", "content": "..." }  // tras decidir/arreglar/descubrir

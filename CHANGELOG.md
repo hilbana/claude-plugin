@@ -4,6 +4,22 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.3.0] — 2026-08-09
+
+### Changed
+
+- **The remaining commands drop the redundant prefix too**: `/hilbana:plan`,
+  `/hilbana:trabajar-issue`, `/hilbana:crear-docs` and `/hilbana:memoria-switch`
+  (were `/hilbana:hilbana-plan` and friends). 2.2.0 fixed the three cycle shortcuts
+  and left these four inconsistent; now every command in the plugin follows the same
+  rule — the file name doesn't repeat the plugin name.
+
+  These four are older than the shortcuts and some people will have them in their
+  fingers, so by the letter of the versioning rules this is a major. Shipped as a
+  minor on purpose: the muscle memory being broken is `/hilbana:hilbana-plan`, which
+  only existed since this morning's 2.0.0 — the pre-2.0.0 `/hilbana-plan` stopped
+  working then, not now.
+
 ## [2.2.0] — 2026-08-09
 
 ### Changed

@@ -16,12 +16,12 @@ framework**.
   - `SessionStart` hook: when you open a repo, it reminds the agent to load prior
     context (`mem_context`) and to save proactively.
   - `SessionEnd` hook: on close, it automatically saves a summary of the session.
-  - `/hilbana-memoria-switch` to import your engram history.
+  - `/hilbana:memoria-switch` to import your engram history.
 - **Per-task token accounting**:
   - `Stop` / `SessionEnd` hooks report the tokens the agent spent and bill them to
     the issue it has claimed. See *Token accounting* below.
 - **The human+agent workflow framework** (a *pull* queue): the orchestrator command
-  `/hilbana-plan`, plus the cycle prompts `claim_next`, `finish` and `review` — which
+  `/hilbana:plan`, plus the cycle prompts `claim_next`, `finish` and `review` — which
   since 2.0.0 are served by Hilbana's own MCP, not by this plugin, so they work in any
   MCP client, with `/hilbana:claim-next`, `/hilbana:finish` and `/hilbana:review` as
   shortcuts. The worker pulls from the queue and stops at *In Review*; the reviewer

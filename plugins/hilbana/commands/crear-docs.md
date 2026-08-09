@@ -115,7 +115,7 @@ list_docs { "projectId": "<projectId>" }
 - Resume al usuario qué docs quedaron creados/actualizados y dónde verlos.
 - Sugiere el siguiente paso natural: **descomponer el proyecto en tareas** (issues con
   su `agentContext` y dependencias). Si quiere, eso se trabaja con `save_issue` /
-  `link_issues`; cada issue luego se ejecuta con `/hilbana-trabajar-issue`.
+  `link_issues`; cada issue luego se ejecuta con `/hilbana:trabajar-issue`.
 
 ## Flujo en una línea
 

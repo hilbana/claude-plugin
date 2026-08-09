@@ -11,7 +11,7 @@ Sirve para que el contexto de un repo sobreviva entre sesiones: decisiones,
 bugs (con causa raíz), convenciones, descubrimientos y resúmenes de sesión.
 
 El plugin registra el MCP de Hilbana por ti. Para migrar desde engram, mira
-**`/hilbana-memoria-switch`**.
+**`/hilbana:memoria-switch`**.
 
 Las tools son `mcp__hilbana__mem_*` (aquí por `<nombre>`). **No hay tool ni
 servidor nuevo que instalar**: viven en el MCP de Hilbana ya registrado.

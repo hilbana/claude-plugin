@@ -3,7 +3,7 @@ description: "The orchestrator of the human+agent framework. Compiles a goal (ep
 argument-hint: "<epic identifier | milestone id | goal in plain text>"
 ---
 
-# /hilbana-plan — el orquestador
+# /hilbana:plan — el orquestador
 
 Vas a compilar `$ARGUMENTS` (una épica, un milestone, o un objetivo en
 texto) en un **grafo de sub-issues ejecutable** por los workers de Hilbana, y

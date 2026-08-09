@@ -23,10 +23,10 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:claim-next` | MCP prompt (+ shortcut) | Pull the next agent-ready issue from the queue and start it |
 | [`finish`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:finish` | MCP prompt (+ shortcut) | Close your turn on an issue at **In Review**, with telemetry and memory |
 | [`review`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:review` | MCP prompt (+ shortcut) | Review what's In Review: approve to Done or send back |
-| [`/hilbana-plan`](#hilbana-plan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
-| [`/hilbana-trabajar-issue`](#hilbana-trabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
-| [`/hilbana-crear-docs`](#hilbana-crear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
-| [`/hilbana-memoria-switch`](#hilbana-memoria-switch) | command | Move your agent memory from engram to Hilbana |
+| [`/hilbana:plan`](#hilbanaplan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
+| [`/hilbana:trabajar-issue`](#hilbanatrabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
+| [`/hilbana:crear-docs`](#hilbanacrear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
+| [`/hilbana:memoria-switch`](#hilbanamemoria-switch) | command | Move your agent memory from engram to Hilbana |
 | [`hilbana-mcp`](#hilbana-mcp) | skill | All 30 MCP tools: when to use each, with examples |
 | [`hilbana-memoria`](#hilbana-memoria) | skill | The proactive memory protocol (scope, when to save, what not to) |
 | [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope |
@@ -41,7 +41,7 @@ The plugin encodes a **pull** model. The tracker is the work bus; workers don't 
 tasks by hand and never talk to each other. The issue graph is the only channel.
 
 ```
-/hilbana-plan          goal ──> DAG of sub-issues, frontier marked agentReady
+/hilbana:plan          goal ──> DAG of sub-issues, frontier marked agentReady
                                             │
                                             ▼
 claim_next  (prompt)   worker pulls the next ready leaf (atomic, claimed on serve)
@@ -62,7 +62,7 @@ Two rules hold the whole thing together:
 2. **`record_run` and `release_issue` always run** — including on failure, including
    if you abort. Otherwise the lock dangles and blocks other agents.
 
-`/hilbana-trabajar-issue` is the exception: a single-issue flow that does close to
+`/hilbana:trabajar-issue` is the exception: a single-issue flow that does close to
 Done, for when you're driving one task by hand rather than draining a queue.
 
 The three cycle steps are **MCP prompts**, not commands — see
@@ -112,7 +112,7 @@ file is `finish.md` and you type `/hilbana:finish`. Naming the file `hilbana-fin
 
 Without the plugin, use the prompts directly. Nothing is lost but the typing.
 
-### `/hilbana-plan`
+### `/hilbana:plan`
 
 **The orchestrator: a goal-to-graph compiler.** Turns an epic, a milestone or a plain
 text goal into an executable DAG of sub-issues.
@@ -149,7 +149,7 @@ Two operational notes: `agentReady: true` **doesn't apply on create** — set it
 second `save_issue` call; and re-running `/plan` on the same epic **doesn't duplicate
 children** (it reads `subIssues`, creates only what's missing and fills DoR gaps).
 
-### `/hilbana-trabajar-issue`
+### `/hilbana:trabajar-issue`
 
 **Work one specific issue end to end**, with live multi-agent coordination.
 
@@ -170,7 +170,7 @@ badge on the issue card and in the list (synced live by Zero), each `add_comment
 appears in the thread interleaved with `issue_events`, and the badge disappears the
 moment you release. A **409** on claim means another agent has it — don't work it.
 
-### `/hilbana-crear-docs`
+### `/hilbana:crear-docs`
 
 **Bootstrap a project's documentation in Hilbana**, from your repo plus an interview.
 
@@ -192,7 +192,7 @@ Its guardrails: **don't invent** (only what's in the files or what you confirmed
 **be surgical** (2–3 useful docs beat ten empty templates), and **no secrets** — if a
 credential shows up in an env file, it's referenced by variable name, never by value.
 
-### `/hilbana-memoria-switch`
+### `/hilbana:memoria-switch`
 
 **Move your agent memory from engram to Hilbana.** Guided, non-destructive.
 
