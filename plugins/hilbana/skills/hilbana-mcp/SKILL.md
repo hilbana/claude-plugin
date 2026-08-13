@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 30 tools grouped into read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 31 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (30 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (31 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -26,9 +26,56 @@ Las tools se llaman `mcp__hilbana__<nombre>` (aquí las nombro por `<nombre>`).
   `get_issue` y se escribe/edita con `save_issue`.
 - **Scope de la key**: si la key es *read-only* solo existen las tools de lectura;
   si está *acotada a un proyecto*, todas las tools quedan limitadas a ese proyecto.
+- **La key identifica al USUARIO, no a un workspace**: la conexión alcanza todos
+  los workspaces de los que ese usuario es miembro. El de la key es solo el
+  **default** (el que se usa cuando no dices otra cosa) y si te invitan a uno
+  nuevo entra solo, sin credenciales ni servidores MCP adicionales. Ver §0.
+  Excepción: una key acotada a un proyecto **no hereda nada**, se queda en el suyo.
 - **Antes de escribir, descubre IDs**: `save_issue`/`change_issue_state` necesitan
   IDs (stateId, assigneeId, labelId, projectId, milestoneId, cycleId). Resuélvelos
   con las tools de descubrimiento; no inventes IDs.
+
+---
+
+## 0) Varios workspaces — dónde opera cada llamada
+
+| Tool | Para qué | Cuándo |
+|------|----------|--------|
+| `list_workspaces` | Los workspaces al alcance de esta conexión: `id`, nombre, slug, tu rol y `default` | Al empezar en un repo nuevo, o si sospechas que la issue no está donde miras |
+
+Reglas, en orden de lo que más te va a pasar:
+
+1. **Con id de entidad no hay nada que decir.** `get_issue`, `add_comment`,
+   `change_issue_state`, `claim_issue`, `save_issue` (con `id`)… deducen el
+   workspace de la propia entidad: los UUID son globales. Si eres miembro,
+   funciona; si no, es un "no encontrada o sin acceso".
+2. **Los listados usan el default** salvo que pases `workspaceId`:
+   `list_issues`, `list_projects`, `search_issues`, `list_labels`,
+   `list_members`, `list_milestones`, `list_cycles`, `list_workflow_states`,
+   `list_custom_fields`, `list_docs`, `save_issue` (al crear), `next_ready_issue`
+   e `issues_panel`. Pedir un workspace del que no eres miembro es un error
+   explícito, no una lista vacía.
+3. **Al crear, mira dónde quedó.** `save_issue` (nueva), `save_project`,
+   `save_milestone` y `save_doc` devuelven `workspace: { id, name }`. Es la forma
+   de cazar en el momento un "lo he creado en el cliente que no era".
+4. **`ABC-123` no es único entre workspaces.** `search_issues` con un
+   identificador y sin `workspaceId` busca en todos y puede devolver **varias**
+   filas, cada una con su `workspace`. Si salen varias, pregunta: no elijas.
+5. **La memoria (`mem_*`) vive siempre en el workspace por defecto**, trabajes
+   donde trabajes. No se fragmenta por workspace a propósito, para que el
+   contexto de un repo no se parta entre clientes.
+
+```
+list_workspaces
+// -> [{ id, name, slug, role, default: true }, { id, name, …, default: false }]
+
+list_issues { "workspaceId": "<id del cliente B>", "stateCategory": "started" }
+search_issues { "query": "ABC-123" }   // puede devolver la de A y la de B
+```
+
+**Ojo con el cupo de agentes**: operar en un workspace ajeno consume asiento de
+agente **allí**. Si el plan de ese workspace está lleno, la llamada falla con un
+mensaje que dice qué keys lo ocupan y de quién son.
 
 ---
 
@@ -296,6 +343,12 @@ decisiones, bugs, convenciones, descubrimientos y resúmenes de sesión que
 sobreviven entre sesiones, en **cualquier** repo. El `scope` lo pasa el cliente
 como **nombre del proyecto** (el de la carpeta del repo, p.ej. `hilbana`, igual
 que engram). Aislada por **workspace** (independiente de `projects`).
+
+Con varios workspaces al alcance (§0), la memoria vive **siempre en el workspace
+por defecto de la key**, aunque estés trabajando issues de otro. Es deliberado: si
+se fragmentara, el contexto de un repo se partiría entre clientes. Consecuencia a
+tener presente: lo que guardas trabajando para un workspace invitado **no** lo ve
+su equipo, y lo que ellos saben no te llega.
 
 | Tool | Para qué | Notas |
 |------|----------|-------|

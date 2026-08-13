@@ -4,6 +4,30 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.4.0] — 2026-08-13
+
+### Added
+
+- **`list_workspaces` and the `workspaceId` parameter in the `hilbana-mcp` skill**
+  (31 tools, was 30). Hilbana's MCP no longer freezes the workspace in the
+  credential: a key identifies the *user* and the connection reaches every
+  workspace they belong to, so being invited to a new one needs no new key and no
+  second MCP server. The skill grows a section §0 with the rules that actually
+  bite — tools taking an entity id infer the workspace from it, listing tools
+  default to the credential's workspace unless you pass `workspaceId`, creation
+  tools answer with where the thing ended up, and `ABC-123` is no longer unique
+  across workspaces so a search by identifier may return several rows (ask, don't
+  pick). Also flagged: working in someone else's workspace consumes an agent seat
+  *there*.
+
+### Changed
+
+- **The `api_key` setting description** says what a key reaches now: it is the
+  default workspace, not a boundary.
+- **Memory section**: spells out that `mem_*` always lives in the default
+  workspace, whichever workspace you are working in — and what that costs (what
+  you learn for an invited workspace does not reach its team).
+
 ## [2.3.0] — 2026-08-09
 
 ### Changed
