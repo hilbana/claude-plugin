@@ -344,19 +344,34 @@ sobreviven entre sesiones, en **cualquier** repo. El `scope` lo pasa el cliente
 como **nombre del proyecto** (el de la carpeta del repo, p.ej. `hilbana`, igual
 que engram). Aislada por **workspace** (independiente de `projects`).
 
-Con varios workspaces al alcance (§0), la memoria vive **siempre en el workspace
-por defecto de la key**, aunque estés trabajando issues de otro. Es deliberado: si
-se fragmentara, el contexto de un repo se partiría entre clientes. Consecuencia a
-tener presente: lo que guardas trabajando para un workspace invitado **no** lo ve
-su equipo, y lo que ellos saben no te llega.
+Con varios workspaces al alcance (§0), **escribir y leer no van al mismo sitio**,
+y es a propósito:
+
+- **Se escribe donde estás trabajando.** Si tienes una issue **reclamada**
+  (`claim_issue`), `mem_save` y `mem_session_summary` guardan en el workspace de
+  esa issue — así lo que aprendes trabajando para alguien le sirve a su equipo.
+  Sin nada en curso (o con el lock ya vencido), en tu workspace por defecto. La
+  respuesta te dice en cuál quedó.
+- **Se lee de donde pidas.** `mem_search`, `mem_context` y `mem_get` usan tu
+  workspace por defecto salvo que pases `workspaceId`. Al ponerte con issues de
+  otro workspace, carga también su contexto:
+  `mem_context { scope, workspaceId }` — ahí está lo que su equipo ya sabe.
+- **`workspaceId` gana** sobre la deducción. Es la forma de corregirla y, sobre
+  todo, de mandar a **tu** workspace algo que es sobre ti.
+- **Los invitados de un proyecto (rol guest) no entran**: la memoria no está
+  acotada por proyecto, así que para ellos se queda en su workspace por defecto.
+
+⚠️ Piensa antes de guardar algo **personal** (cómo trabajas, tus preferencias)
+mientras trabajas para otro workspace: acaba siendo visible para su equipo. Eso
+va con `workspaceId` al tuyo.
 
 | Tool | Para qué | Notas |
 |------|----------|-------|
-| `mem_search` | Buscar memoria por full-text (relevancia + recencia) | `query`, `scope`, `limit?`; devuelve `snippet`+`score` |
-| `mem_context` | Memorias recientes del scope (sin query) | Para cargar contexto al arrancar |
-| `mem_get` | Una memoria completa por id (sin truncar) | Acotada al workspace |
-| `mem_save` | Guardar una observación | `content`, `type`, `scope`; `topic_key?`/`session_id?`/`metadata?`. No existe si la key es read-only |
-| `mem_session_summary` | Resumen de fin de sesión | `scope`, `summary`; es un `mem_save` type=`note`, topic_key=`session-summary` |
+| `mem_search` | Buscar memoria por full-text (relevancia + recencia) | `query`, `scope`, `limit?`, `workspaceId?`; devuelve `snippet`+`score` |
+| `mem_context` | Memorias recientes del scope (sin query) | Para cargar contexto al arrancar; `workspaceId?` para el de otro workspace |
+| `mem_get` | Una memoria completa por id (sin truncar) | Acotada al workspace (`workspaceId?`) |
+| `mem_save` | Guardar una observación | `content`, `type`, `scope`; `topic_key?`/`session_id?`/`metadata?`/`workspaceId?`. Va al workspace que trabajas y la respuesta lo dice. No existe si la key es read-only |
+| `mem_session_summary` | Resumen de fin de sesión | `scope`, `summary`, `workspaceId?`; es un `mem_save` type=`note`, topic_key=`session-summary` |
 
 `type`: `decision`/`bug`/`convention`/`discovery`/`preference`/`fact`/`note`.
 

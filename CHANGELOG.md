@@ -4,6 +4,23 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.5.0] — 2026-08-13
+
+### Changed
+
+- **Agent memory follows the work now**, and both skills say so. `mem_save` and
+  `mem_session_summary` store in the workspace of the issue you have *claimed*, so
+  what you learn working for someone reaches their team; with nothing claimed (or
+  an expired lock) it stays in your default workspace, and the response tells you
+  which one it picked. Reading is explicit: `mem_search` / `mem_context` /
+  `mem_get` take `workspaceId` and default to yours, so loading what another
+  team already knows is a deliberate call.
+- **Two warnings that the previous release could not give**: anything about
+  *you* (how you work, your preferences) saved while working for another
+  workspace ends up visible to its team — send it to yours with `workspaceId` —
+  and project-scoped guests are left out entirely, since memory is not scoped by
+  project.
+
 ## [2.4.0] — 2026-08-13
 
 ### Added

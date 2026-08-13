@@ -30,10 +30,17 @@ Usa SIEMPRE la misma `scope` para el mismo proyecto (si no, partes la memoria). 
 guardar puedes enriquecer el registro del scope con `scope_name`, `git_remote` y
 `root_path` — opcionales, solo diagnóstico.
 
-> **Aislamiento:** la memoria está acotada al **workspace** de tu API key. El
-> scope de la key (si está acotada a un proyecto) NO aplica a la memoria: es
-> independiente de `projects`. Dos repos distintos = dos scopes distintos; un
-> mismo scope desde otra workspace no ve nada.
+> **Aislamiento:** la memoria está acotada al **workspace**. El scope de la key
+> (si está acotada a un proyecto) NO aplica a la memoria: es independiente de
+> `projects`. Dos repos distintos = dos scopes distintos; el mismo scope en otro
+> workspace es otra memoria.
+>
+> **Con varios workspaces al alcance** (la key llega a todos aquellos de los que
+> eres miembro): se **guarda** en el workspace de la issue que tengas reclamada —
+> y si no hay ninguna, en tu workspace por defecto —, y se **lee** del por
+> defecto salvo que pases `workspaceId`. La respuesta de `mem_save` dice dónde
+> quedó. Lo que sea sobre TI (cómo trabajas, tus preferencias) mándalo a tu
+> workspace con `workspaceId`, o lo verá el equipo para el que estés trabajando.
 
 ## Las 5 tools
 
