@@ -4,6 +4,22 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.6.0] — 2026-08-25
+
+### Fixed
+
+- **The hooks no longer hang when the deployment is unreachable.** Both POSTs went
+  out with no `signal`, so Node kept waiting up to undici’s 300 s `headersTimeout`
+  whenever the backend accepted the connection but never answered — exactly what a
+  deploy looks like from outside. The hook blew past its own timeout and the harness
+  killed it, printing `SessionEnd hook … failed: Hook cancelled` on the way out.
+  Both now abort at 4 s, well under the hook budget, and fall into the `catch` that
+  was already there: the failure is traced and the session closes clean.
+- Same fix in `usage-report.cjs`, which runs on **every** `Stop`: with the endpoint
+  down it was adding up to 10 s of dead wait to each turn, not just to the close.
+  Nothing is lost either way — the usage cursor only advances on `res.ok`, so an
+  aborted report is retried on the next turn.
+
 ## [2.5.0] — 2026-08-13
 
 ### Changed

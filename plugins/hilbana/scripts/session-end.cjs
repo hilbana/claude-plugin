@@ -19,6 +19,11 @@ const { resolveConfig, makeTracer } = require("./plugin-config.cjs");
 const { apiKey: API_KEY, baseUrl: BASE_URL } = resolveConfig();
 const API_URL = `${BASE_URL}/api/memory`;
 const trace = makeTracer("memoria");
+// El POST tiene que abortar MUY por debajo del timeout del hook (15 s en hooks.json):
+// si el backend acepta la conexión pero no contesta —lo que pasa mientras se despliega—
+// el fetch de Node espera hasta el headersTimeout de undici (300 s), el harness mata el
+// hook por timeout y el usuario se come un "Hook cancelled" al cerrar la sesión.
+const FETCH_TIMEOUT_MS = 4000;
 const MAX_PEDIDO = 600;
 const MAX_RESULTADO = 1800;
 const MAX_FICHEROS = 40;
@@ -142,6 +147,7 @@ async function main(raw) {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${API_KEY}` },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     trace(`POST ${res.status}`);
   } catch (e) {

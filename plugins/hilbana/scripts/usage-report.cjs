@@ -31,6 +31,13 @@ const API_URL = `${BASE_URL}/api/agents/usage`;
 const AGENT_NAME = process.env.HILBANA_AGENT_NAME || "claude-code";
 const trace = makeTracer("usage");
 
+// El POST tiene que abortar MUY por debajo del timeout del hook (10 s en hooks.json):
+// si el backend acepta la conexión pero no contesta —lo que pasa mientras se despliega—
+// el fetch de Node espera hasta el headersTimeout de undici (300 s) y el harness mata el
+// hook. Esto corre en cada Stop, así que colgarse aquí se nota en TODOS los turnos.
+// Abortar es gratis: el cursor solo avanza con res.ok, y el tramo se reintenta.
+const FETCH_TIMEOUT_MS = 4000;
+
 // Un fichero de cursor POR SESIÓN, no un JSON compartido: dos sesiones que cierran
 // turno a la vez no se pisan al escribir.
 const CURSOR_DIR = path.join(os.homedir(), ".claude", "hilbana-usage");
@@ -216,6 +223,7 @@ async function main(raw) {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${API_KEY}` },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     trace(`POST ${res.status}`);
     // El cursor avanza SOLO si el servidor aceptó: si el endpoint está caído, el
