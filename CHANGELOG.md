@@ -4,6 +4,16 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.7.0] — 2026-09-26
+
+### Added
+
+- **Labels from the MCP**: the `hilbana-mcp` skill documents `save_label` (create,
+  rename or recolor a workspace label; never duplicates a name) and `delete_label`
+  (admin only; without `confirm` it only reports the impact, and `replaceWith` moves
+  the issues to another label before deleting). `list_labels` now returns
+  `issueCount`.
+
 ## [2.6.0] — 2026-08-25
 
 ### Fixed

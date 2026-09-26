@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 31 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 33 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (31 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (33 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -142,7 +142,7 @@ Sin estado, no escribes. Estas 6 tools convierten "nombres humanos" en IDs.
 |------|----------|-------------------|
 | `list_workflow_states` | estados (id, nombre, **type**, team) | `stateId` en `save_issue` / `change_issue_state` |
 | `list_members` | miembros (id, nombre, email) | `assigneeId` |
-| `list_labels` | labels (id, nombre, color) | `labelIds` / `addLabelIds` / `removeLabelIds` |
+| `list_labels` | labels (id, nombre, color, `issueCount`) | `labelIds` / `addLabelIds` / `removeLabelIds` |
 | `list_milestones` | milestones (id, nombre, proyecto) | `milestoneId` |
 | `list_cycles` | cycles (id, número, proyecto, fechas) | asignar issue a un cycle |
 | `list_custom_fields` | campos personalizados del workspace (id, nombre, **type**, orden) | el mapa `customFields` de `save_issue` |
@@ -233,6 +233,8 @@ save_doc { "projectId": "<id>", "title": "Decisiones de auth",
 | `unlink_issues` | Borra una relación por `relationId` | El `relationId` sale de `get_issue`/`link_issues` |
 | `save_project` | Crea un project | Falla si la key está acotada a un proyecto |
 | `save_milestone` | Crea (sin `id`) o actualiza (con `id`) un milestone | Al crear: `projectId`+`name`. Edita `name`/`description`/`targetDate` (epoch ms, `null` limpia). NO mueve el milestone de proyecto y NO borra (borrar es solo por UI). Para meterle issues: `save_issue` con `milestoneId` |
+| `save_label` | Crea (sin `id`) o renombra/recolorea (con `id`) una label de issues | Las labels son de TODO el workspace, no de un proyecto. Al crear: `name` y `color` opcional (hex `#rrggbb`). Si ya existe una con ese nombre (sin distinguir mayúsculas) NO duplica: devuelve la existente con `created:false`. No la pueden usar invitados ni keys acotadas a un proyecto |
+| `delete_label` | Borra una label (solo admin) | **Sin `confirm:true` no borra**: devuelve el impacto (issues, plantillas, automatizaciones, SLA, vistas). Con `confirm:true` borra; `replaceWith:<labelId>` pasa antes las issues a otra label. Las automatizaciones/SLA/vistas NO se tocan: la respuesta dice cuáles quedan colgando — díselo al humano |
 
 **Ejemplo — crear una issue completa para otro agente:**
 ```
