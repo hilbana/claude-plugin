@@ -300,8 +300,8 @@ makes them do nothing rather than break your session. They need **Node 18+** on 
 ### `SessionStart`
 
 `scripts/session-start.cjs` — computes `scope` from the repo folder name and injects
-the memory protocol as context, reminding the agent to load prior context and to save
-proactively. It doesn't call the MCP (a hook is a shell command); it only injects the
+the memory protocol as context, reminding the agent to load prior context and to save what
+a future session would need. It doesn't call the MCP (a hook is a shell command); it only injects the
 reminder.
 
 ### `Stop` / `SessionEnd` (usage)

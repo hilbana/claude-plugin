@@ -4,6 +4,16 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.7.1] — 2026-09-26
+
+### Changed
+
+- **The `SessionStart` reminder no longer shouts.** "GUARDA PROACTIVAMENTE… tras
+  cada decisión… sin esperar a que te lo pidan" made current models save far more
+  than was useful. It now asks the agent to save what would spare a future session
+  some work (decisions, bugs with their root cause, conventions, discoveries, user
+  preferences), matching the Hilbana MCP server instructions.
+
 ## [2.7.0] — 2026-09-26
 
 ### Added

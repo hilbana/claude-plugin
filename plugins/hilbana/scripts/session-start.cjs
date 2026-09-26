@@ -28,9 +28,8 @@ function finish(raw) {
     `(con este plugin instalado son mcp__plugin_hilbana_hilbana__…; si registraste el MCP a mano, mcp__hilbana__…). ` +
     `Al ARRANCAR, carga el contexto de sesiones previas: ` +
     `mem_context { "scope": "${scope}" } (y mem_search para un tema concreto). ` +
-    `GUARDA PROACTIVAMENTE con mem_save { "scope": "${scope}", "type", "content" } ` +
-    `tras cada decisión, bug (con causa raíz), convención, descubrimiento o preferencia del usuario — ` +
-    `sin esperar a que te lo pidan. ` +
+    `Guarda con mem_save { "scope": "${scope}", "type", "content" } lo que le ahorraría trabajo a una sesión futura: ` +
+    `decisiones, bugs con su causa raíz, convenciones, descubrimientos y preferencias del usuario. ` +
     `Al CERRAR la sesión, antes de decir "listo": ` +
     `mem_session_summary { "scope": "${scope}", "summary": "objetivo/logros/próximos pasos" }. ` +
     `type debe ser uno de: decision | bug | convention | discovery | preference | fact | note.`;
