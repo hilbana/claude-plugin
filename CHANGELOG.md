@@ -4,6 +4,18 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.9.0] — 2026-09-29
+
+### Added
+
+- **Account overview from the MCP**: the `hilbana-mcp` skill documents
+  `account_overview`, the bird's-eye view of every workspace the user owns —
+  weekly throughput against the previous week, work in progress, agents working
+  and the agent queue, a health light per workspace, what each agent is doing
+  right now and what needs attention (stuck issues, failed agent runs, overdue or
+  at-risk milestones and cycles, stalled projects). It fails for users who own no
+  workspace and for keys scoped to a single project.
+
 ## [2.8.0] — 2026-09-29
 
 ### Added

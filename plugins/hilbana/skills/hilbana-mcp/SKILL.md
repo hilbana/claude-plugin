@@ -42,6 +42,7 @@ Las tools se llaman `mcp__hilbana__<nombre>` (aquí las nombro por `<nombre>`).
 | Tool | Para qué | Cuándo |
 |------|----------|--------|
 | `list_workspaces` | Los workspaces al alcance de esta conexión: `id`, nombre, slug, tu rol y `default` | Al empezar en un repo nuevo, o si sospechas que la issue no está donde miras |
+| `account_overview` | Vista general de TODOS los workspaces de los que el usuario es **dueño**: cerradas en 7 días (y la semana anterior), en curso, agentes trabajando, cola de agentes, semáforo por workspace (`ok`/`warn`/`alert`), qué hace cada agente ahora y lo que necesita atención (`exceptions`: atascadas, runs de agente fallidos, milestones/ciclos vencidos o en riesgo, proyectos parados) | Cuando te pregunten «¿cómo va la compañía?», «¿qué está parado?» o «¿qué hacen los agentes?». Falla si el usuario no es dueño de ningún workspace o si la key está acotada a un proyecto |
 
 Reglas, en orden de lo que más te va a pasar:
 
