@@ -207,15 +207,31 @@ proyecto.
 
 | Tool | Para qué |
 |------|----------|
-| `list_docs` | Lista docs (id, título, projectId, position); `projectId` opcional para filtrar |
-| `get_doc` | Lee un doc completo (título, body markdown, projectId, fechas) |
-| `save_doc` | Crea (sin `id`, `projectId` obligatorio) o actualiza (con `id`) un doc |
+| `list_docs` | Lista docs (id, título, projectId, folderId, position); `projectId` opcional para filtrar |
+| `get_doc` | Lee un doc completo (título, body markdown, projectId, folderId, fechas) |
+| `save_doc` | Crea (sin `id`, `projectId` obligatorio) o actualiza (con `id`) un doc. `folderId` lo mete en una carpeta; `null` lo saca a la raíz; omitido, no se mueve |
+| `list_doc_folders` | Carpetas de docs (id, name, projectId, parentId, position): un árbol por proyecto (`parentId` null = raíz) |
+| `save_doc_folder` | Crea una carpeta (sin `id`: `projectId` y `name`; `parentId` para anidarla) o la renombra (`name`) / mueve (`parentId`, `null` = raíz) |
+| `delete_doc_folder` | Borra una carpeta SIN borrar su contenido: sus docs y subcarpetas suben a la carpeta padre (o a la raíz) |
+
+Las carpetas no cruzan proyectos (un doc solo entra en carpetas de su proyecto, y
+si cambia de proyecto sale de la suya) y una carpeta no se puede mover dentro de sí
+misma ni de sus subcarpetas.
 
 **Ejemplo — registrar una decisión de diseño:**
 ```
 list_projects                                 -> projectId
 save_doc { "projectId": "<id>", "title": "Decisiones de auth",
            "body": "# Auth\n\n- Sesiones cortadas por sessions_valid_from..." }
+```
+
+**Ejemplo — ordenar la documentación en carpetas:**
+```
+list_doc_folders { "projectId": "<id>" }                          -> árbol actual
+save_doc_folder { "projectId": "<id>", "name": "Arquitectura" }   -> folderId
+save_doc_folder { "projectId": "<id>", "name": "ADR", "parentId": "<folderId>" }
+list_docs { "projectId": "<id>" }                                 -> docs con su folderId
+save_doc { "id": "<docId>", "title": "<su título>", "folderId": "<folderId>" }
 ```
 
 ---

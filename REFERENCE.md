@@ -233,7 +233,7 @@ comments or multi-agent coordination.
 |-------|-------|
 | **Read** | `get_issue`, `list_issues`, `search_issues`, `list_projects`, `list_comments` |
 | **Discovery** (resolve ids before writing) | `list_workflow_states`, `list_members`, `list_labels`, `list_milestones`, `list_cycles` |
-| **Context** (project docs) | `list_docs`, `get_doc`, `save_doc` |
+| **Context** (project docs and their folders) | `list_docs`, `get_doc`, `save_doc`, `list_doc_folders`, `save_doc_folder`, `delete_doc_folder` |
 | **Write** | `save_issue`, `change_issue_state`, `add_comment`, `link_issues`, `unlink_issues`, `save_project`, `save_milestone`, `save_label`, `delete_label` |
 | **Orchestration** (soft lock) | `next_ready_issue`, `claim_issue`, `release_issue`, `record_run` |
 | **Memory** | `mem_search`, `mem_context`, `mem_get`, `mem_save`, `mem_session_summary` |

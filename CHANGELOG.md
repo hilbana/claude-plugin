@@ -4,6 +4,17 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.8.0] — 2026-09-29
+
+### Added
+
+- **Document folders from the MCP**: the `hilbana-mcp` skill documents
+  `list_doc_folders` (the folder tree of a project), `save_doc_folder` (create a
+  folder or subfolder, rename it or move it) and `delete_doc_folder` (deletes the
+  folder; its documents and subfolders move up to the parent). `list_docs` and
+  `get_doc` now return each document's `folderId`, and `save_doc` takes `folderId`
+  to put a document in a folder or back at the root (`null`).
+
 ## [2.7.1] — 2026-09-26
 
 ### Changed
