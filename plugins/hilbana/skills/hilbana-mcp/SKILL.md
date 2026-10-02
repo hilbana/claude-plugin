@@ -85,7 +85,7 @@ mensaje que dice qué keys lo ocupan y de quién son.
 | Tool | Para qué | Cuándo |
 |------|----------|--------|
 | `get_issue` | Contexto **completo** de UNA issue en una sola llamada | Es la tool estrella: úsala al empezar con cualquier issue |
-| `list_issues` | Lista issues (filtros opcionales `teamId`/`projectId`) | Panorámica de un team/proyecto |
+| `list_issues` | Lista issues (filtros opcionales `teamId`/`projectId`) | Panorámica de un team/proyecto. Con el `projectId` de un **producto** trae también las tareas que le entregan las iniciativas; `delivery`: `own` / `delivered` / `all` (por defecto) |
 | `search_issues` | Full-text (identificador, título, descripción, comentarios y campos de texto) + filtros por campo personalizado | Encontrar una issue por palabra clave o acotar por el valor de un campo |
 | `list_projects` | Lista projects visibles | Resolver el `projectId`, prueba de humo |
 | `list_comments` | Hilo de comentarios de una issue (cronológico) | Leer la discusión sin todo el contexto de `get_issue` |
@@ -243,12 +243,12 @@ save_doc { "id": "<docId>", "title": "<su título>", "folderId": "<folderId>" }
 
 | Tool | Para qué | Notas |
 |------|----------|-------|
-| `save_issue` | Crea (sin `id`) o actualiza (con `id`) una issue | Sin `id`: `teamId`+`title`+`stateId` obligatorios. Admite `description`, `agentContext`, `assigneeId`, `projectId`, `milestoneId`, `dueDate` (epoch ms), `parentId` (sub-issue), `labelIds`. En update: `addLabelIds`/`removeLabelIds`, `dueDate:null` limpia. `customFields` escribe campos personalizados (ver §2) |
+| `save_issue` | Crea (sin `id`) o actualiza (con `id`) una issue | Sin `id`: `teamId`+`title`+`stateId` obligatorios. Admite `description`, `agentContext`, `assigneeId`, `projectId`, `milestoneId`, `dueDate` (epoch ms), `parentId` (sub-issue), `labelIds`. En update: `addLabelIds`/`removeLabelIds`, `dueDate:null` limpia. `customFields` escribe campos personalizados (ver §2). `productId`/`productMilestoneId` entregan una tarea de una iniciativa a un producto (ver «Iniciativas y productos») |
 | `change_issue_state` | Mueve una issue de estado | Setea started_at/completed_at/canceled_at según el `type` del nuevo estado |
 | `add_comment` | Comenta una issue (markdown) | Admite menciones `@[Nombre](user:UUID)`; autoría = usuario de la key |
 | `link_issues` | Relaciona dos issues | `type`: `blocks` / `blocked_by` / `relates`. Idempotente |
 | `unlink_issues` | Borra una relación por `relationId` | El `relationId` sale de `get_issue`/`link_issues` |
-| `save_project` | Crea un project | Falla si la key está acotada a un proyecto |
+| `save_project` | Crea (sin `id`) o edita (con `id`) un project | Al crear, falla si la key está acotada a un proyecto. `kind`: `initiative` o `product`, **definitivo** (no se cambia ni se quita; al General no se le pone) |
 | `save_milestone` | Crea (sin `id`) o actualiza (con `id`) un milestone | Al crear: `projectId`+`name`. Edita `name`/`description`/`targetDate` (epoch ms, `null` limpia). NO mueve el milestone de proyecto y NO borra (borrar es solo por UI). Para meterle issues: `save_issue` con `milestoneId` |
 | `save_label` | Crea (sin `id`) o renombra/recolorea (con `id`) una label de issues | Las labels son de TODO el workspace, no de un proyecto. Al crear: `name` y `color` opcional (hex `#rrggbb`). Si ya existe una con ese nombre (sin distinguir mayúsculas) NO duplica: devuelve la existente con `created:false`. No la pueden usar invitados ni keys acotadas a un proyecto |
 | `delete_label` | Borra una label (solo admin) | **Sin `confirm:true` no borra**: devuelve el impacto (issues, plantillas, automatizaciones, SLA, vistas). Con `confirm:true` borra; `replaceWith:<labelId>` pasa antes las issues a otra label. Las automatizaciones/SLA/vistas NO se tocan: la respuesta dice cuáles quedan colgando — díselo al humano |
@@ -265,6 +265,26 @@ save_issue {
   "dueDate": 1750000000000
 }
 ```
+
+### Iniciativas y productos
+
+Un proyecto puede ser **iniciativa** (un objetivo con fin, p. ej. «Reservas online»)
+o **producto** (un repositorio permanente, p. ej. «API de reservas»). Las tareas
+viven en la iniciativa y se **entregan** al producto donde se implementan:
+
+```
+save_issue { "id": "RES-12", "productId": "<proyecto producto>", "productMilestoneId": "<milestone de ESE producto>" }
+```
+
+- Un producto por tarea. Si toca dos repositorios, pártela en sub-tareas, una por producto.
+- Cambiar `productId` limpia `productMilestoneId` salvo que lo mandes en la misma llamada.
+- Quien solo escribe en el producto **implementa**: estado, comentarios, horas,
+  claim/release/`record_run` y `productMilestoneId`. El contenido (título,
+  descripción…) es de la iniciativa.
+- Una key acotada a un producto alcanza también las tareas que le entregan.
+- Las relaciones de `get_issue` traen el estado de la otra tarea (reducidas a
+  identificador y estado si no la puedes ver): sabes qué te bloquea aunque esté en
+  otro repositorio.
 
 **Ejemplo — avanzar de estado + dejar nota:**
 ```
@@ -288,8 +308,8 @@ lo ven al instante vía `get_issue` (`agentWorking*`).
 
 | Tool | Para qué | Comportamiento |
 |------|----------|----------------|
-| `next_ready_issue` | **Tirar de la cola**: pide la siguiente issue lista para agente y la reclama de forma atómica | Devuelve la primera issue `agentReady` sin lock ni blockers abiertos (o `null` si la cola está vacía). **La entrega YA reclamada para ti** (no hace falta `claim_issue` después). `projectId` opcional para acotar. Ver "La cola pull" abajo |
-| `claim_issue` | Tomar una issue concreta (elegida a mano) para indicar que la trabajas ahora | **Falla (409)** si ya la tiene OTRO agente. Setea agentWorkingBy = tú, agentWorkingSince = ahora |
+| `next_ready_issue` | **Tirar de la cola**: pide la siguiente issue lista para agente y la reclama de forma atómica | Devuelve la primera issue `agentReady` sin lock ni blockers abiertos (o `null` si la cola está vacía). **La entrega YA reclamada para ti** (no hace falta `claim_issue` después). `projectId` opcional para acotar (el de un producto incluye las tareas que le entregan). Ver "La cola pull" abajo |
+| `claim_issue` | Tomar una issue concreta (elegida a mano) para indicar que la trabajas ahora | **Falla (409)** si ya la tiene OTRO agente o si tiene bloqueadoras sin terminar (`blocked_by` que no está en completed/canceled): el error las nombra con su estado. Setea agentWorkingBy = tú, agentWorkingSince = ahora |
 | `release_issue` | Soltarla al terminar/parar | Solo quien la tomó (o un admin) puede liberar (si no, 403) |
 | `record_run` | Registrar el resultado de tu ejecución sobre la issue (historial de runs + métricas de agentes) | `issueId` oblig.; opcionales `result` (`success`/`failure`/`cancelled`), `summary`, `commitRef`, `startedAt`/`finishedAt` (epoch ms). Atribuido al usuario de la key. **No informes tokens**: el consumo lo mide solo el hook del plugin desde el transcript; estimarlo a mano falsea el dato |
 

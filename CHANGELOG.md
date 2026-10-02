@@ -4,6 +4,23 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.10.0] — 2026-10-02
+
+### Added
+
+- **Initiatives and products from the MCP**: the `hilbana-mcp` skill documents
+  project `kind` (`initiative` / `product`, final once set) in `save_project`, and
+  delivering an initiative task to a product with `productId` /
+  `productMilestoneId` in `save_issue`. `list_issues` and `next_ready_issue` on a
+  product include the tasks delivered to it (`delivery`: `own` / `delivered` /
+  `all`), and a key scoped to a product reaches them too.
+
+### Changed
+
+- **`claim_issue` refuses a blocked task** (409) and names the open blockers with
+  their state; `get_issue` relations carry the other task's state, reduced to
+  identifier and state when you can't see it.
+
 ## [2.9.0] — 2026-09-29
 
 ### Added
