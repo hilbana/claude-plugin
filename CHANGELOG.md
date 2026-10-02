@@ -4,6 +4,16 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.10.1] — 2026-10-02
+
+### Fixed
+
+- **Closing comment is back**: the `hilbana-mcp` skill asks again for a closing
+  comment (`add_comment`) for the reviewer before `record_run` — what was done, how
+  it was verified, the commit or PR. The `record_run` summary goes to the run
+  history and doesn't replace it. `change_issue_state` reminds you in `nextSteps`
+  if it's missing.
+
 ## [2.10.0] — 2026-10-02
 
 ### Added

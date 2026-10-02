@@ -317,6 +317,12 @@ Llama a `record_run` **siempre al terminar** (también con `failure`/`cancelled`
 no lo lograste): es lo que puebla el historial de runs de la ficha y las métricas
 de agentes. Es independiente del feed de actividad humano.
 
+Y **antes**, deja un **comentario de cierre** con `add_comment` para quien revise:
+qué hiciste, cómo lo verificaste, el commit o PR y lo que quede pendiente. El
+`summary` de `record_run` no lo sustituye: el revisor lee el comentario. Si al
+cerrar te falta alguno de los dos, la respuesta de `change_issue_state` te lo
+recuerda en `nextSteps`.
+
 Comprueba el lock antes de reclamar leyendo `agentWorking` con `get_issue` si
 quieres evitar el error.
 
@@ -439,8 +445,11 @@ libera. No cierra su propio trabajo a Done — eso lo hace el revisor.
 5. ...implementas en rama según agentContext (solo el alcance de la issue)...
 6. add_comment { issueId, body }       // deja rastro en hitos
 7. // verificas con el comando de la DoR (obligatorio; nada avanza sin pasarlo)
+   add_comment { issueId, body }       // comentario de cierre para quien revise: qué hiciste,
+                                       // cómo lo verificaste, commit o PR y lo pendiente
    change_issue_state -> In Review      // gate blando; NO a Done
 8. record_run { issueId, result, summary, commitRef }   // siempre, también en fallo
+   // el summary va al historial de runs: NO sustituye al comentario de cierre
    mem_save { scope, type, content }    // decisiones/bugs/convenciones durables
 9. release_issue { id }                // libera el lock, siempre (también si abortas)
 ```
