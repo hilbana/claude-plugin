@@ -20,4 +20,5 @@ Eres un **worker**: no eliges la issue a mano, tiras de la cola.
 4. **`get_issue`** y muestra el `agentContext`, la DoD y el `verifyCommand` antes de
    empezar. Un `blocked_by` abierto es señal de PARAR: comenta y libera.
 
-Al terminar, cierra con **`/hilbana:finish`**.
+Apunta el `agentCloseState` que trae la issue: es el estado en el que la dejarás al
+terminar. Al terminar, cierra con **`/hilbana:finish`**.

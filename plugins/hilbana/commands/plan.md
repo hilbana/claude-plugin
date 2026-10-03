@@ -109,19 +109,23 @@ fan-out:
    por issue, con tope de concurrencia). Cada worker corre el contrato cerrado:
    ```
    claim_issue → get_issue → change_state In Progress → implementar en el worktree →
-   verificar (comando DoR) → commit + PR → change_state In Review →
+   verificar (comando DoR) → commit + PR → change_state agentCloseState →
    record_run(success, commitRef) → mem_save → release_issue
    ```
    En fallo: comenta el porqué + `record_run(failure)` + devuelve a Todo + `release_issue`.
-3. **Espera** a que la oleada aterrice (In Review); recoge `{ issue, estado, rama/PR,
-   follow-ups, notas }`.
+3. **Espera** a que la oleada aterrice (en su `agentCloseState`); recoge `{ issue,
+   estado, rama/PR, follow-ups, notas }`.
 4. **CHECKPOINT de hito:** incorpora descubrimientos, gestiona fallos, re-planifica el
    siguiente hito (vuelve al Paso 1). El humano revisa los PRs de la oleada entre
    hitos.
 
 Reglas de oro: los workers **nunca se hablan entre sí**; el grafo es la verdad. Cada
-worker deja su trabajo en **In Review** (gate blando) — lo mergea la
-revisión (el prompt `review` del MCP o el humano), no el worker.
+worker deja su trabajo en el estado que indica **`agentCloseState`** (lo devuelven
+`claim_issue`, `get_issue` y `next_ready_issue`; lo elige el dueño del workspace, In
+Review por defecto) y nunca lo busca por nombre. Con In Review es un gate blando: lo
+mergea la revisión (el prompt `review` del MCP o el humano), no el worker. Si el
+workspace eligió un estado completado (Done…), no hay cola de revisión: el humano
+revisa los PRs en el checkpoint.
 
 ## Idempotencia (imprescindible para el modo híbrido)
 

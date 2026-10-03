@@ -24,6 +24,13 @@ Las tools se llaman `mcp__hilbana__<nombre>` (aquí las nombro por `<nombre>`).
 - **`agentContext`**: campo markdown por issue pensado para agentes (archivos
   relevantes, comando de verificación, definición de Done, notas). Se lee con
   `get_issue` y se escribe/edita con `save_issue`.
+- **`agentCloseState`** (`stateId`, `name`, `instruction`): el estado en el que el
+  agente deja la tarea al terminarla. Lo elige el dueño de cada workspace en
+  *Ajustes › Estados*: un `started` que no es el primero (In Review, por defecto, u
+  otro creado por el equipo) o un `completed` (Done…). Lo devuelven `claim_issue`,
+  `get_issue` y `next_ready_issue`; usa su `stateId` tal cual, **no** busques el
+  estado de cierre por nombre. Es una instrucción, no un bloqueo:
+  `change_issue_state` te avisa en `nextSteps` si dejas la tarea en otro estado final.
 - **Scope de la key**: si la key es *read-only* solo existen las tools de lectura;
   si está *acotada a un proyecto*, todas las tools quedan limitadas a ese proyecto.
 - **La key identifica al USUARIO, no a un workspace**: la conexión alcanza todos
@@ -309,7 +316,7 @@ lo ven al instante vía `get_issue` (`agentWorking*`).
 | Tool | Para qué | Comportamiento |
 |------|----------|----------------|
 | `next_ready_issue` | **Tirar de la cola**: pide la siguiente issue lista para agente y la reclama de forma atómica | Devuelve la primera issue `agentReady` sin lock ni blockers abiertos (o `null` si la cola está vacía). **La entrega YA reclamada para ti** (no hace falta `claim_issue` después). `projectId` opcional para acotar (el de un producto incluye las tareas que le entregan). Ver "La cola pull" abajo |
-| `claim_issue` | Tomar una issue concreta (elegida a mano) para indicar que la trabajas ahora | **Falla (409)** si ya la tiene OTRO agente o si tiene bloqueadoras sin terminar (`blocked_by` que no está en completed/canceled): el error las nombra con su estado. Setea agentWorkingBy = tú, agentWorkingSince = ahora |
+| `claim_issue` | Tomar una issue concreta (elegida a mano) para indicar que la trabajas ahora | **Falla (409)** si ya la tiene OTRO agente o si tiene bloqueadoras sin terminar (`blocked_by` que no está en completed/canceled): el error las nombra con su estado. Setea agentWorkingBy = tú, agentWorkingSince = ahora. Devuelve `agentCloseState`: el estado en el que dejarás la tarea al acabar |
 | `release_issue` | Soltarla al terminar/parar | Solo quien la tomó (o un admin) puede liberar (si no, 403) |
 | `record_run` | Registrar el resultado de tu ejecución sobre la issue (historial de runs + métricas de agentes) | `issueId` oblig.; opcionales `result` (`success`/`failure`/`cancelled`), `summary`, `commitRef`, `startedAt`/`finishedAt` (epoch ms). Atribuido al usuario de la key. **No informes tokens**: el consumo lo mide solo el hook del plugin desde el transcript; estimarlo a mano falsea el dato |
 
@@ -361,21 +368,22 @@ next_ready_issue { }                          // (o { projectId }); null -> cola
 get_issue { "id": "<devuelta>" }              // lee agentContext: archivos, verificación, DoD
 // ...trabajas en rama; add_comment en hitos...
 // verificas con el comando de la DoR
-change_issue_state { "id": "<id>", "stateId": "<In Review>" }   // NO a Done: el worker no cierra su trabajo
+change_issue_state { "id": "<id>", "stateId": "<agentCloseState.stateId>" }   // el que eligió el workspace, no uno buscado por nombre
 record_run { "issueId": "<id>", "result": "success",
              "summary": "qué hiciste y cómo lo verificaste", "commitRef": "<sha/PR>" }
 mem_save { "scope": "mi-repo", "type": "decision", "content": "..." }
 release_issue { "id": "<id>" }                // siempre libera, también en fallo
 ```
 
-El worker deja la issue en **En revisión** (gate blando) — **no** la
+El worker deja la issue en el estado que indica **`agentCloseState`**: lo elige el
+dueño del workspace. Por defecto es **In Review** (gate blando): el worker no la
 cierra a Done; eso lo hace el **revisor** (el prompt `review` o un humano), que
-aprueba a Done o la devuelve a In Progress. Mientras el estado "En revisión" no
-exista en un tablero, se cierra a Done como antes.
+aprueba a Done o la devuelve a In Progress. Si el workspace eligió un estado
+completado (Done…), el worker la cierra él mismo y no hay cola de revisión.
 
 Estos loops están envueltos en los **prompts que sirve el propio MCP**: `claim_next`
-(tira de la cola y arranca), `finish` (deja En revisión + `record_run` + `mem_save` +
-libera) y `review` (el revisor cierra o devuelve). En Claude Code se invocan como
+(tira de la cola y arranca), `finish` (la deja en su `agentCloseState` + `record_run` +
+`mem_save` + libera) y `review` (el revisor cierra o devuelve). En Claude Code se invocan como
 `/mcp__<servidor>__<nombre>`. El orquestador `/hilbana:plan` sigue siendo un command
 de este plugin.
 
@@ -433,31 +441,32 @@ mem_session_summary { "scope": "...", "summary": "..." }       // al cerrar
 
 ## Flujo completo de un agente (pull + gate de revisión)
 
-El worker es un **consumidor puro de la cola**: tira, trabaja, deja En revisión y
-libera. No cierra su propio trabajo a Done — eso lo hace el revisor.
+El worker es un **consumidor puro de la cola**: tira, trabaja, deja la issue en su
+`agentCloseState` y libera. Con In Review (el valor por defecto) no cierra su propio
+trabajo a Done — eso lo hace el revisor.
 
 ```
 1. mem_context { scope }               // carga memoria del scope al arrancar
 2. next_ready_issue { }                // cola pull: la siguiente lista, YA reclamada. null -> parar
    // (¿issue concreta a mano? claim_issue { id }; si 409, elige otra)
-3. get_issue { id }                    // descripción + agentContext (archivos, verificación, DoD) + blocked_by
+3. get_issue { id }                    // descripción + agentContext (archivos, verificación, DoD) + blocked_by + agentCloseState
 4. change_issue_state -> In Progress   // si no vino ya en 'started' por el auto-claim (list_workflow_states -> stateId)
 5. ...implementas en rama según agentContext (solo el alcance de la issue)...
 6. add_comment { issueId, body }       // deja rastro en hitos
 7. // verificas con el comando de la DoR (obligatorio; nada avanza sin pasarlo)
    add_comment { issueId, body }       // comentario de cierre para quien revise: qué hiciste,
                                        // cómo lo verificaste, commit o PR y lo pendiente
-   change_issue_state -> In Review      // gate blando; NO a Done
+   change_issue_state -> agentCloseState.stateId   // el estado de cierre del workspace; nunca por nombre
 8. record_run { issueId, result, summary, commitRef }   // siempre, también en fallo
    // el summary va al historial de runs: NO sustituye al comentario de cierre
    mem_save { scope, type, content }    // decisiones/bugs/convenciones durables
 9. release_issue { id }                // libera el lock, siempre (también si abortas)
 ```
 
-El **revisor** (el prompt `review` o un humano) toma las issues En revisión, verifica
-contra la DoD y las cierra a **Done** o las devuelve a **In Progress** con un
-comentario. Nota: si el estado "En revisión" no existe en tu tablero, el worker
-cierra a Done en el paso 7.
+Si el `agentCloseState` es un estado `started` (In Review), el **revisor** (el prompt
+`review` o un humano) toma esas issues, verifica contra la DoD y las cierra a
+**Done** o las devuelve a **In Progress** con un comentario. Si es un estado
+`completed` (Done…), el worker ya la cierra en el paso 7 y no hay cola de revisión.
 
 ## Errores frecuentes
 
@@ -465,6 +474,9 @@ cierra a Done en el paso 7.
   inexistente falla.
 - **Cambiar de estado por nombre**: `change_issue_state` quiere `stateId`, no el
   texto del estado.
+- **Buscar el estado de cierre por nombre**: el de fin de tarea ya te lo da
+  `agentCloseState.stateId` (en `claim_issue`, `get_issue` y `next_ready_issue`);
+  no lo busques en `list_workflow_states` ni des por hecho que es In Review.
 - **No liberar**: si haces `claim_issue` y no `release_issue`, la issue queda
   "en curso" y bloquea a otros agentes.
 - **Tools de escritura ausentes**: si no ves `save_issue` y compañía, tu key es

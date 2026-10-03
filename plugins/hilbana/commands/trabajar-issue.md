@@ -52,6 +52,11 @@ prioridad, asignado, `dueDate`, labels, sub-issues, comentarios previos, activid
 y **relaciones** (`blocks` / `blocked_by` / `relates`). Si hay `blocked_by` sin
 resolver, esa es tu primera señal de stop.
 
+Apunta también **`agentCloseState`** (`stateId`, `name`, `instruction`): es el estado
+en el que tienes que dejar la issue al terminar. Lo elige el dueño del workspace (In
+Review por defecto, o un estado completado como Done); también viene en la respuesta
+de `claim_issue`.
+
 Carga también el contexto a nivel de proyecto (especificaciones, decisiones,
 runbooks):
 
@@ -62,7 +67,8 @@ get_doc  { "id": "<doc relevante>" }
 
 ## Paso 3 — Trabajar dejando rastro en vivo
 
-1. **Mueve la issue a "en progreso"** (descubre el estado primero):
+1. **Mueve la issue a "en progreso"** si el claim no la dejó ya en un estado
+   `started` (descubre el estado primero):
    ```
    list_workflow_states            // elige el stateId cuyo type sea "started"
    change_issue_state { "id": "ABC-123", "stateId": "<In Progress>" }
@@ -78,13 +84,15 @@ get_doc  { "id": "<doc relevante>" }
 
 ## Paso 4 — Cerrar y liberar (apaga el badge)
 
-1. Mueve la issue al estado final:
+1. Déjala en el estado de cierre que eligió el workspace:
    ```
-   change_issue_state { "id": "ABC-123", "stateId": "<Done / completed>" }
+   change_issue_state { "id": "ABC-123", "stateId": "<agentCloseState.stateId>" }
    ```
+   No lo busques por nombre ni elijas tú otro: si `change_issue_state` te avisa en
+   `nextSteps` de que no es el estado que toca, corrígelo.
 2. Comentario de cierre con el resultado y cómo se verificó:
    ```
-   add_comment { "issueId": "ABC-123", "body": "Done: <qué quedó> · Verificado con <comando>." }
+   add_comment { "issueId": "ABC-123", "body": "Hecho: <qué quedó> · Verificado con <comando>." }
    ```
 3. **Libera el lock**:
    ```
@@ -117,7 +125,7 @@ get_doc  { "id": "<doc relevante>" }
 
 `claim_issue` → `get_issue` (+ `list_docs`/`get_doc`) → `change_issue_state` (In
 Progress) → trabajar + `add_comment` → verificar Done → `change_issue_state`
-(Done) → `release_issue`.
+(`agentCloseState`) → `release_issue`.
 
 ## Si algo te bloquea
 
