@@ -21,8 +21,8 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | Component | Type | One-liner |
 |-----------|------|-----------|
 | [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:claim-next` | MCP prompt (+ shortcut) | Pull the next agent-ready issue from the queue and start it |
-| [`finish`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:finish` | MCP prompt (+ shortcut) | Close your turn on an issue at **In Review**, with telemetry and memory |
-| [`review`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:review` | MCP prompt (+ shortcut) | Review what's In Review: approve to Done or send back |
+| [`finish`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:finish` | MCP prompt (+ shortcut) | Close your turn on an issue in its **`agentCloseState`**, with telemetry and memory |
+| [`review`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:review` | MCP prompt (+ shortcut) | Review what's In Review: approve to Done or send back (only when the workspace closes agent work there) |
 | [`/hilbana:plan`](#hilbanaplan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
 | [`/hilbana:trabajar-issue`](#hilbanatrabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana:crear-docs`](#hilbanacrear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
@@ -49,7 +49,7 @@ claim_next  (prompt)   worker pulls the next ready leaf (atomic, claimed on serv
                                        … work happens …
                                             │
                                             ▼
-finish      (prompt)   verify DoD ──> In Review (never Done) + record_run + mem_save
+finish      (prompt)   verify DoD ──> agentCloseState + record_run + mem_save
                                             │
                                             ▼
 review      (prompt)   reviewer: Done ✔  or  back to In Progress with feedback
@@ -57,13 +57,19 @@ review      (prompt)   reviewer: Done ✔  or  back to In Progress with feedback
 
 Two rules hold the whole thing together:
 
-1. **A worker never closes its own work to Done.** It stops at *In Review*. The gate
-   lives in the commands (the role), not in the database.
+1. **A worker leaves its work in the state the workspace chose.** Each workspace's
+   owner picks it under *Settings › States* — *In Review* by default, or a completed
+   state such as *Done* — and the MCP returns it as `agentCloseState` (`stateId`,
+   `name`, `instruction`) from `claim_issue`, `get_issue` and `next_ready_issue`.
+   Workers use that `stateId`; they never look the closing state up by name. With
+   *In Review* there's a review gate; with *Done* there isn't. It's an instruction,
+   not a lock: `change_issue_state` warns in `nextSteps` if you leave the task in
+   another final state.
 2. **`record_run` and `release_issue` always run** — including on failure, including
    if you abort. Otherwise the lock dangles and blocks other agents.
 
-`/hilbana:trabajar-issue` is the exception: a single-issue flow that does close to
-Done, for when you're driving one task by hand rather than draining a queue.
+`/hilbana:trabajar-issue` follows the same rule in a single-issue flow, for when
+you're driving one task by hand rather than draining a queue.
 
 The three cycle steps are **MCP prompts**, not commands — see
 [The cycle now lives in the MCP server](#the-cycle-now-lives-in-the-mcp-server).
@@ -85,11 +91,12 @@ when the server does — no plugin release needed. In Claude Code they show up a
 | Prompt | Argument | What it does |
 |--------|----------|--------------|
 | `claim_next` | `[projectId]` — narrows the queue; empty = all your teams | `mem_context` → `next_ready_issue` (atomic, arrives already claimed) → *In Progress* → `get_issue` for the `agentContext` and DoD. `null` means the queue is empty: it exits clean, with no lock to release. |
-| `finish` | `[issue]` — defaults to the one you claimed | Verify the DoD (nothing advances without green) → *In Review*, **never Done** → `record_run` (always, failures included) → `mem_save` → `add_comment` for the reviewer → `release_issue` (always). |
-| `review` | `[target]` — an issue or a project; empty = the whole queue | Find what's In Review → load it with `get_issue` + `list_comments` → verify the command **and** the diff against every DoD criterion → Done with an approval comment, or back to In Progress with actionable feedback. |
+| `finish` | `[issue]` — defaults to the one you claimed | Verify the DoD (nothing advances without green) → the `agentCloseState` the workspace chose → `record_run` (always, failures included) → `mem_save` → `add_comment` for the reviewer → `release_issue` (always). |
+| `review` | `[target]` — an issue or a project; empty = the whole queue If the workspace's `agentCloseState` is a completed state there's no review queue, and it says so. Otherwise: find the issues sitting in that `stateId` → load it with `get_issue` + `list_comments` → verify the command **and** the diff against every DoD criterion → Done with an approval comment, or back to In Progress with actionable feedback. |
 
 Their rules are worth knowing as a user, because they're what makes the framework
-auditable: a worker never closes its own work to Done, `record_run` and
+auditable: a worker leaves its work in the `agentCloseState` the workspace chose
+(never a state looked up by name), `record_run` and
 `release_issue` run on every path including failure, and a returned review says which
 criterion failed and how to reproduce it rather than "it doesn't work".
 
@@ -159,11 +166,11 @@ children** (it reads `subIssues`, creates only what's missing and fills DoR gaps
 | **MCP tools** | `claim_issue`, `get_issue`, `list_docs`, `get_doc`, `list_workflow_states`, `change_issue_state`, `add_comment`, `list_members`, `release_issue` |
 
 `claim_issue` → `get_issue` (+ docs) → *In Progress* → implement, commenting at
-milestones → verify the DoD → final state → `release_issue`.
+milestones → verify the DoD → `agentCloseState` → `release_issue`.
 
-Unlike the worker flow, **this one does close to Done**. Use it when you're driving a
-single task deliberately; use the `claim_next` + `finish` prompts when you're
-draining a queue under the review gate.
+Like the worker flow, it leaves the issue in the closing state the workspace chose
+(`agentCloseState.stateId`). Use it when you're driving a single task deliberately;
+use the `claim_next` + `finish` prompts when you're draining a queue.
 
 It doubles as a tour of the UI: the claim lights up a green 🤖 *"in progress by …"*
 badge on the issue card and in the list (synced live by Zero), each `add_comment`
@@ -245,7 +252,9 @@ The concepts it makes explicit, and the ones that bite if you don't know them:
   `issues.number`. Tools accept it as `id` anyway.
 - **Status is a `workflow_state` row.** Names are free-form per team, but logic keys
   off its `type` (backlog/unstarted/started/completed/canceled). To change state you
-  need the `stateId`, not the name → `list_workflow_states`.
+  need the `stateId`, not the name → `list_workflow_states`. The closing state
+  doesn't need a lookup: `agentCloseState.stateId` comes with `claim_issue`,
+  `get_issue` and `next_ready_issue`.
 - **`agentContext`** is the per-issue markdown field written for agents: files,
   verification command, DoD, notes.
 - **Your key's scope decides what exists.** A *read-only* key exposes only the read
@@ -253,7 +262,8 @@ The concepts it makes explicit, and the ones that bite if you don't know them:
 - **Never invent ids.** Resolve them with the discovery tools first.
 - **`dueDate` is epoch milliseconds**, and `null` clears it.
 
-Frequent mistakes it calls out: changing state by name, forgetting `release_issue`
+Frequent mistakes it calls out: changing state by name, looking up the closing
+state by name instead of using `agentCloseState`, forgetting `release_issue`
 (the issue stays "in progress" and blocks others), and assuming write tools exist when
 your key is read-only.
 

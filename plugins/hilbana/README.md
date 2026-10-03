@@ -24,8 +24,9 @@ framework**.
   `/hilbana:plan`, plus the cycle prompts `claim_next`, `finish` and `review` — which
   since 2.0.0 are served by Hilbana's own MCP, not by this plugin, so they work in any
   MCP client, with `/hilbana:claim-next`, `/hilbana:finish` and `/hilbana:review` as
-  shortcuts. The worker pulls from the queue and stops at *In Review*; the reviewer
-  closes.
+  shortcuts. The worker pulls from the queue and leaves its work in the state the
+  workspace's owner chose (`agentCloseState`: *In Review* by default, where the
+  reviewer closes, or a completed state such as *Done*).
 - **Skills** `hilbana-memoria` (the memory protocol) and `hilbana-mcp` (the MCP tools
   and the queue flows).
 
