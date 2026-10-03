@@ -4,6 +4,20 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.11.0] — 2026-10-03
+
+### Changed
+
+- **The closing state is the workspace's call**: `finish`, `claim-next`,
+  `trabajar-issue`, `plan`, `review` and the `hilbana-mcp` skill leave the task in
+  the state the MCP returns as `agentCloseState` (`stateId`, `name`,
+  `instruction`, in `claim_issue`, `get_issue` and `next_ready_issue`), which each
+  workspace's owner picks under *Settings › States* — *In Review* by default, or a
+  completed state such as *Done*. Gone are "In Review, never Done" and looking the
+  closing state up by name with `list_workflow_states`. `review` says there's no
+  review queue when the workspace closes agent work to a completed state, and
+  `trabajar-issue` no longer closes straight to Done.
+
 ## [2.10.1] — 2026-10-02
 
 ### Fixed
