@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 33 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 38 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples. Use it whenever you touch Hilbana issues, projects, docs, comments or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (33 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (38 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -60,8 +60,8 @@ Reglas, en orden de lo que más te va a pasar:
 2. **Los listados usan el default** salvo que pases `workspaceId`:
    `list_issues`, `list_projects`, `search_issues`, `list_labels`,
    `list_members`, `list_milestones`, `list_cycles`, `list_workflow_states`,
-   `list_custom_fields`, `list_docs`, `save_issue` (al crear), `next_ready_issue`
-   e `issues_panel`. Pedir un workspace del que no eres miembro es un error
+   `list_custom_fields`, `list_project_labels`, `list_docs`, `save_issue` (al
+   crear), `next_ready_issue` e `issues_panel`. Pedir un workspace del que no eres miembro es un error
    explícito, no una lista vacía.
 3. **Al crear, mira dónde quedó.** `save_issue` (nueva), `save_project`,
    `save_milestone` y `save_doc` devuelven `workspace: { id, name }`. Es la forma
@@ -94,7 +94,7 @@ mensaje que dice qué keys lo ocupan y de quién son.
 | `get_issue` | Contexto **completo** de UNA issue en una sola llamada | Es la tool estrella: úsala al empezar con cualquier issue |
 | `list_issues` | Lista issues (filtros opcionales `teamId`/`projectId`) | Panorámica de un team/proyecto. Con el `projectId` de un **producto** trae también las tareas que le entregan las iniciativas; `delivery`: `own` / `delivered` / `all` (por defecto) |
 | `search_issues` | Full-text (identificador, título, descripción, comentarios y campos de texto) + filtros por campo personalizado | Encontrar una issue por palabra clave o acotar por el valor de un campo |
-| `list_projects` | Lista projects visibles | Resolver el `projectId`, prueba de humo |
+| `list_projects` | Lista projects visibles, cada uno con su `projectLabelId` (etiqueta de proyecto) | Resolver el `projectId`, prueba de humo |
 | `list_comments` | Hilo de comentarios de una issue (cronológico) | Leer la discusión sin todo el contexto de `get_issue` |
 
 `get_issue` devuelve mucho: identificador, título, descripción, **agentContext**,
@@ -144,7 +144,7 @@ Operadores por tipo (el `fieldId` sale de `list_custom_fields`):
 
 ## 2) Descubrimiento — resolver IDs antes de escribir
 
-Sin estado, no escribes. Estas 6 tools convierten "nombres humanos" en IDs.
+Sin estado, no escribes. Estas 7 tools convierten "nombres humanos" en IDs.
 
 | Tool | Devuelve | Lo necesitas para |
 |------|----------|-------------------|
@@ -154,6 +154,7 @@ Sin estado, no escribes. Estas 6 tools convierten "nombres humanos" en IDs.
 | `list_milestones` | milestones (id, nombre, proyecto) | `milestoneId` |
 | `list_cycles` | cycles (id, número, proyecto, fechas) | asignar issue a un cycle |
 | `list_custom_fields` | campos personalizados del workspace (id, nombre, **type**, orden) | el mapa `customFields` de `save_issue` |
+| `list_project_labels` | etiquetas de **proyecto** (id, nombre, color, `position`, `projectCount`): los grupos de la lista de proyectos del sidebar, **no** las labels de issues. Un invitado solo ve las de sus proyectos | `projectLabelId` en `save_project` |
 
 **Patrón típico (crear issue):**
 ```
@@ -253,12 +254,16 @@ save_doc { "id": "<docId>", "title": "<su título>", "folderId": "<folderId>" }
 | `save_issue` | Crea (sin `id`) o actualiza (con `id`) una issue | Sin `id`: `teamId`+`title`+`stateId` obligatorios. Admite `description`, `agentContext`, `assigneeId`, `projectId`, `milestoneId`, `dueDate` (epoch ms), `parentId` (sub-issue), `labelIds`. En update: `addLabelIds`/`removeLabelIds`, `dueDate:null` limpia. `customFields` escribe campos personalizados (ver §2). `productId`/`productMilestoneId` entregan una tarea de una iniciativa a un producto (ver «Iniciativas y productos») |
 | `change_issue_state` | Mueve una issue de estado | Setea started_at/completed_at/canceled_at según el `type` del nuevo estado |
 | `add_comment` | Comenta una issue (markdown) | Admite menciones `@[Nombre](user:UUID)`; autoría = usuario de la key |
+| `update_comment` | Edita el `body` de un comentario (`commentId`, de `list_comments`) | Solo su autor: con una key, la persona dueña de la key. Editar **no** vuelve a notificar |
+| `delete_comment` | Borra un comentario (`commentId`) | Solo su autor. No se puede deshacer |
 | `link_issues` | Relaciona dos issues | `type`: `blocks` / `blocked_by` / `relates`. Idempotente |
 | `unlink_issues` | Borra una relación por `relationId` | El `relationId` sale de `get_issue`/`link_issues` |
-| `save_project` | Crea (sin `id`) o edita (con `id`) un project | Al crear, falla si la key está acotada a un proyecto. `kind`: `initiative` o `product`, **definitivo** (no se cambia ni se quita; al General no se le pone) |
+| `save_project` | Crea (sin `id`) o edita (con `id`) un project | Al crear, falla si la key está acotada a un proyecto. `kind`: `initiative` o `product`, **definitivo** (no se cambia ni se quita; al General no se le pone). `projectLabelId` le pone su etiqueta de proyecto (una como mucho; `null` la quita) |
 | `save_milestone` | Crea (sin `id`) o actualiza (con `id`) un milestone | Al crear: `projectId`+`name`. Edita `name`/`description`/`targetDate` (epoch ms, `null` limpia). NO mueve el milestone de proyecto y NO borra (borrar es solo por UI). Para meterle issues: `save_issue` con `milestoneId` |
 | `save_label` | Crea (sin `id`) o renombra/recolorea (con `id`) una label de issues | Las labels son de TODO el workspace, no de un proyecto. Al crear: `name` y `color` opcional (hex `#rrggbb`). Si ya existe una con ese nombre (sin distinguir mayúsculas) NO duplica: devuelve la existente con `created:false`. No la pueden usar invitados ni keys acotadas a un proyecto |
 | `delete_label` | Borra una label (solo admin) | **Sin `confirm:true` no borra**: devuelve el impacto (issues, plantillas, automatizaciones, SLA, vistas). Con `confirm:true` borra; `replaceWith:<labelId>` pasa antes las issues a otra label. Las automatizaciones/SLA/vistas NO se tocan: la respuesta dice cuáles quedan colgando — díselo al humano |
+| `save_project_label` | Crea (sin `id`) o renombra/recolorea (con `id`) una etiqueta de **proyecto** (un grupo del sidebar) | Solo el dueño del workspace; no la usan keys acotadas a un proyecto. Al crear: `name`, `color` opcional (hex `#rrggbb`, gris por defecto) y `workspaceId` opcional; va al final de la lista. Si ya existe una con ese nombre (sin distinguir mayúsculas) NO duplica: devuelve la existente con `created:false`. El plan limita cuántas hay |
+| `delete_project_label` | Borra una etiqueta de proyecto (solo el dueño) | **Sin `confirm:true` no borra**: devuelve los proyectos que la llevan. Con `confirm:true` la borra y esos proyectos se quedan sin etiqueta (no se borran) |
 
 **Ejemplo — crear una issue completa para otro agente:**
 ```
@@ -303,6 +308,14 @@ add_comment { "issueId": "ABC-123", "body": "Empezando: monto la skill y el comm
 **Ejemplo — marcar dependencia:**
 ```
 link_issues { "fromIssueId": "ABC-124", "toIssueId": "ABC-123", "type": "blocked_by" }
+```
+
+**Ejemplo — agrupar proyectos en el sidebar:**
+```
+list_project_labels                                   -> ¿existe ya "Clientes"?
+save_project_label { "name": "Clientes", "color": "#2f81f7" }   -> id (o la existente, created:false)
+save_project { "id": "<projectId>", "projectLabelId": "<id>" }
+save_project { "id": "<projectId>", "projectLabelId": null }   // lo saca del grupo
 ```
 
 ---
@@ -472,6 +485,10 @@ Si el `agentCloseState` es un estado `started` (In Review), el **revisor** (el p
 
 - **Inventar IDs**: usa siempre las tools de descubrimiento; un `stateId`/`labelId`
   inexistente falla.
+- **Confundir las dos clases de etiquetas**: las labels de issues son `list_labels`
+  / `save_label`; los grupos de proyectos del sidebar son las etiquetas de
+  proyecto (`list_project_labels` / `save_project_label`). Un id de una no vale en
+  la otra.
 - **Cambiar de estado por nombre**: `change_issue_state` quiere `stateId`, no el
   texto del estado.
 - **Buscar el estado de cierre por nombre**: el de fin de tarea ya te lo da
