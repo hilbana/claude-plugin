@@ -4,6 +4,22 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.12.0] — 2026-10-05
+
+### Added
+
+- **Edit and delete comments from the MCP**: the `hilbana-mcp` skill documents
+  `update_comment` and `delete_comment`. Only the comment's author can use them
+  (with a key, the person who owns the key), and editing doesn't notify again.
+- **Project labels from the MCP**: the groups in the sidebar's project list, not
+  the issue labels. The skill documents `list_project_labels` (with
+  `projectCount`; a guest only sees the ones on their projects),
+  `save_project_label` (create, rename or recolor; owner only, never duplicates a
+  name, capped by the plan) and `delete_project_label` (owner only; without
+  `confirm` it only lists the affected projects, which keep existing without a
+  label). `save_project` takes `projectLabelId` (`null` removes it) and
+  `list_projects` returns it.
+
 ## [2.11.0] — 2026-10-03
 
 ### Changed
