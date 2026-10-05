@@ -27,7 +27,7 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | [`/hilbana:trabajar-issue`](#hilbanatrabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana:crear-docs`](#hilbanacrear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
 | [`/hilbana:memoria-switch`](#hilbanamemoria-switch) | command | Move your agent memory from engram to Hilbana |
-| [`hilbana-mcp`](#hilbana-mcp) | skill | All 32 MCP tools: when to use each, with examples |
+| [`hilbana-mcp`](#hilbana-mcp) | skill | All 38 MCP tools: when to use each, with examples |
 | [`hilbana-memoria`](#hilbana-memoria) | skill | The proactive memory protocol (scope, when to save, what not to) |
 | [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope |
 | [`Stop`](#stop--sessionend-usage) | hook | Reports token spend, billed to your claimed issue |
@@ -232,17 +232,17 @@ in `/plugin details hilbana@hilbana`.
 
 ### `hilbana-mcp`
 
-Reference for **all 32 MCP tools**, grouped by purpose, with when to reach for each
+Reference for **all 38 MCP tools**, grouped by purpose, with when to reach for each
 and worked examples. Loads whenever you operate on Hilbana issues, projects, docs,
 comments or multi-agent coordination.
 
 | Group | Tools |
 |-------|-------|
 | **Read** | `get_issue`, `list_issues`, `search_issues`, `list_projects`, `list_comments` |
-| **Discovery** (resolve ids before writing) | `list_workflow_states`, `list_members`, `list_labels`, `list_milestones`, `list_cycles` |
+| **Discovery** (resolve ids before writing) | `list_workflow_states`, `list_members`, `list_labels`, `list_milestones`, `list_cycles`, `list_project_labels` |
 | **Account** (owners only) | `account_overview` |
 | **Context** (project docs and their folders) | `list_docs`, `get_doc`, `save_doc`, `list_doc_folders`, `save_doc_folder`, `delete_doc_folder` |
-| **Write** | `save_issue`, `change_issue_state`, `add_comment`, `link_issues`, `unlink_issues`, `save_project`, `save_milestone`, `save_label`, `delete_label` |
+| **Write** | `save_issue`, `change_issue_state`, `add_comment`, `update_comment`, `delete_comment`, `link_issues`, `unlink_issues`, `save_project`, `save_milestone`, `save_label`, `delete_label`, `save_project_label`, `delete_project_label` |
 | **Orchestration** (soft lock) | `next_ready_issue`, `claim_issue`, `release_issue`, `record_run` |
 | **Memory** | `mem_search`, `mem_context`, `mem_get`, `mem_save`, `mem_session_summary` |
 
