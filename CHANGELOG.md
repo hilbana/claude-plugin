@@ -4,6 +4,15 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.13.1] — 2026-10-07
+
+### Fixed
+
+- **`hilbana-memoria` skill**: it said a key scoped to a project doesn't limit
+  memory. It does: such a key only reads and writes its project's scopes (the
+  ones it creates are tied to it), a guest only sees their projects' scopes, and
+  scopes created with an unscoped key are workspace-wide for full members only.
+
 ## [2.13.0] — 2026-10-07
 
 ### Added
