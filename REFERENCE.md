@@ -310,10 +310,22 @@ makes them do nothing rather than break your session. They need **Node 18+** on 
 
 ### `SessionStart`
 
-`scripts/session-start.cjs` — computes `scope` from the repo folder name and injects
-the memory protocol as context, reminding the agent to load prior context and to save what
-a future session would need. It doesn't call the MCP (a hook is a shell command); it only injects the
-reminder.
+`scripts/session-start.cjs` — works out the memory `scope` and the repo's `git_remote`
+(see below) and injects the memory protocol as context, reminding the agent to load prior
+context, to save what a future session would need — never what only holds on your machine,
+like absolute paths or local ports — and to replace stale memories with `replaces` instead
+of leaving two versions. It doesn't call the MCP (a hook is a shell command); it only
+injects the reminder.
+
+**Scope and remote** (`scripts/repo-scope.cjs`, shared with `SessionEnd`):
+
+1. If the repo has a `.hilbana/scope` file, its first line is the scope and no remote is
+   sent. Commit it to pin the scope for the whole team (a repo without a remote, or a
+   monorepo split into several scopes).
+2. Otherwise the scope is the folder name and the remote is `origin`'s URL, with any
+   `user:token@` stripped. With the remote, Hilbana puts every clone of the repo in the
+   same scope, whatever each person called the folder.
+3. No git or no remote: just the folder name.
 
 ### `Stop` / `SessionEnd` (usage)
 
@@ -334,7 +346,7 @@ than lost.
 ### `SessionEnd`
 
 `scripts/session-end.cjs` — summarises the session from the transcript and saves it to
-Hilbana's memory via `POST /api/memory`. Deterministic: it runs on close, so the
+Hilbana's memory via `POST /api/memory`, with the same scope and remote as `SessionStart`. Deterministic: it runs on close, so the
 summary doesn't depend on the agent remembering.
 
 **Dry run for both:** `HILBANA_HOOK_DRYRUN=1` prints the payload instead of sending

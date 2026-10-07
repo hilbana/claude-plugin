@@ -4,13 +4,14 @@
 // (reemplazo del guardado automático de engram). Determinista: corre al cerrar.
 //
 // La API key y la URL llegan por env desde el userConfig del plugin
-// (HILBANA_API_KEY / HILBANA_BASE_URL). scope = nombre de la carpeta del repo.
+// (HILBANA_API_KEY / HILBANA_BASE_URL). Scope y git remote: repo-scope.cjs.
 // Silencioso ante cualquier error (no rompe el cierre).
 //
 // Dry-run: con HILBANA_HOOK_DRYRUN=1 imprime el payload en vez de enviarlo.
 const fs = require("fs");
 const path = require("path");
 const { resolveConfig, makeTracer } = require("./plugin-config.cjs");
+const { resolveRepoScope } = require("./repo-scope.cjs");
 
 // La key sale del env (userConfig) y, si esa interpolación no llega, del
 // store de credenciales del plugin. Sin ese respaldo este hook NUNCA guardaba: la
@@ -108,7 +109,8 @@ async function main(raw) {
     data = JSON.parse(raw || "{}");
   } catch {}
   const cwd = typeof data.cwd === "string" && data.cwd ? data.cwd : process.cwd();
-  const scope = path.basename(cwd.replace(/[\\/]+$/, "")) || "default";
+  // Mismo scope y remote que inyecta SessionStart (repo-scope.cjs).
+  const { scope, gitRemote } = resolveRepoScope(cwd);
   const tpath = data.transcript_path;
   if (!tpath) return;
 
@@ -127,6 +129,7 @@ async function main(raw) {
   const payload = {
     scope,
     scope_name: scope,
+    ...(gitRemote ? { git_remote: gitRemote } : {}),
     type: "note",
     topic_key: "session-summary",
     content: parts.join("\n"),
