@@ -4,6 +4,29 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.13.0] — 2026-10-07
+
+### Added
+
+- **Shared memory across clones**: the `SessionStart` hook now gives the agent
+  the repo's `git_remote` (the `origin` URL, credentials stripped) next to the
+  scope, and the agent passes it to every `mem_*` tool; `SessionEnd` sends it
+  too. Hilbana uses it to put every clone of a repo in the same memory scope,
+  whatever each person named the folder, and to merge a folder's old scope into
+  the repo's one on the next save.
+- **`.hilbana/scope`**: a file in the repo whose first line pins the scope. It
+  wins over the folder name and the remote, so commit it to give the whole team
+  the same scope (a repo without a remote, or a monorepo split in several).
+
+### Changed
+
+- **The memory protocol and the `hilbana-memoria` skill** say the memory is
+  shared by the team: don't save what only holds on your machine (absolute
+  paths, local ports, machine names, personal settings), replace a stale memory
+  with `mem_save { replaces: <id> }` instead of leaving two versions, and look at
+  `authorName` when two memories disagree. `topic_key` groups, it doesn't
+  replace.
+
 ## [2.12.0] — 2026-10-05
 
 ### Added
