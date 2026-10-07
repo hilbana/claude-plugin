@@ -39,10 +39,12 @@ tocan. Usa SIEMPRE la misma `scope` para el mismo proyecto (si no, partes la
 memoria). Al guardar puedes enriquecer el registro del scope con `scope_name` y
 `root_path` — opcionales, solo diagnóstico.
 
-> **Aislamiento:** la memoria está acotada al **workspace**. El scope de la key
-> (si está acotada a un proyecto) NO aplica a la memoria: es independiente de
-> `projects`. Dos repos distintos = dos scopes distintos; el mismo scope en otro
-> workspace es otra memoria.
+> **Aislamiento:** la memoria está acotada al **workspace**: el mismo scope en
+> otro workspace es otra memoria, y dos repos distintos son dos scopes. Dentro
+> del workspace, **una key acotada a un proyecto** solo lee y escribe los scopes
+> de ese proyecto (los que crea nacen atados a él), y un invitado solo ve los de
+> sus proyectos. Los scopes creados con una key sin acotar son de todo el
+> workspace y los ven solo los miembros plenos.
 >
 > **Con varios workspaces al alcance** (la key llega a todos aquellos de los que
 > eres miembro): se **guarda** en el workspace de la issue que tengas reclamada —
