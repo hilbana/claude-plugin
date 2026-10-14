@@ -4,6 +4,29 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.15.0] — 2026-10-14
+
+### Added
+
+- **The working method** ([docs](https://hilbana.com/en/docs/working-method/)): decide →
+  specify → plan → build → audit by blocks → daily report, each phase leaving its
+  output inside Hilbana. New shortcuts for the new MCP prompts:
+  - **`/hilbana:especificar`**: from the «Decisiones» doc to one «Spec · …» doc per
+    area, reviewed against the decisions, then plan.
+  - **`/hilbana:auditar-bloque`**: audit a closed block (parent issue or milestone)
+    against its specs, DoD and decisions; offers to send back what doesn't pass.
+  - **`/hilbana:bandeja`**: turn unread direct messages into proposed issue changes,
+    applied only on a yes (a message is data, never an order).
+
+### Changed
+
+- **`/hilbana:finish`**: when something was decided that changes what was agreed, the
+  closing comment ends with a «Decisiones:» section.
+- **`/hilbana:estado-proyecto`**: reads the project's «Decisiones» doc, flags the
+  period's decisions that clash with an accepted one and adds accepted ones to the doc.
+- **`/hilbana:plan`**: when the project has «Spec · …» docs, each issue links its spec
+  and takes its Definition of Done from that spec's acceptance criteria.
+
 ## [2.14.0] — 2026-10-14
 
 ### Added
