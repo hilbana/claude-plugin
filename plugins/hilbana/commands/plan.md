@@ -52,6 +52,10 @@ el bucle. Por cada sub-issue, escribe una **DoR completa** en su `agentContext`:
 3. **DoD** explícita (qué es "hecho").
 4. **Comando de verificación** (`pnpm typecheck`/`build`/`test:*`).
 5. **Dependencias** (`blocked_by`) si las hay.
+6. **Spec** (si el proyecto tiene docs «Spec · …», los que escribe el prompt
+   `especificar`): el título de la spec que cubre la tarea y los criterios de aceptación
+   que cumple. La **DoD sale de esos criterios**: no la reinventes. Si una tarea no cae
+   en ninguna spec, dilo en vez de improvisar el alcance.
 
 ```
 save_issue { "parentId": "<épica>", "teamId": "<...>", "projectId": "<...>",
