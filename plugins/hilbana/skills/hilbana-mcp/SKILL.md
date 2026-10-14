@@ -1,12 +1,12 @@
 ---
 name: hilbana-mcp
-description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 38 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples, plus direct messages between workspace members. Use it whenever you touch Hilbana issues, projects, docs, comments, messages or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
+description: "How to drive Hilbana's MCP (self-hosted, Linear-style project tracker). All 40 tools grouped into workspaces / read / discovery / context / write / orchestration / memory, with when to reach for each and worked examples, plus direct messages between workspace members. Use it whenever you touch Hilbana issues, projects, docs, comments, messages or multi-agent coordination through the mcp__hilbana__* tools. Written in Spanish."
 ---
 
 # Utilidades del MCP de Hilbana
 
 Hilbana expone su modelo (issues, projects, docs, comentarios, coordinación
-multi-agente) por MCP sobre HTTP (38 tools), autenticado con una API key
+multi-agente) por MCP sobre HTTP (40 tools), autenticado con una API key
 (`Authorization: Bearer hil_<...>`). El plugin registra el MCP por ti; si no ves
 las tools, revisa la `api_key` en la configuración del plugin y reinicia Claude
 Code.
@@ -50,6 +50,8 @@ Las tools se llaman `mcp__hilbana__<nombre>` (aquí las nombro por `<nombre>`).
 |------|----------|--------|
 | `list_workspaces` | Los workspaces al alcance de esta conexión: `id`, nombre, slug, tu rol y `default` | Al empezar en un repo nuevo, o si sospechas que la issue no está donde miras |
 | `account_overview` | Vista general de TODOS los workspaces de los que el usuario es **dueño**: cerradas en 7 días (y la semana anterior), en curso, agentes trabajando, cola de agentes, semáforo por workspace (`ok`/`warn`/`alert`), qué hace cada agente ahora y lo que necesita atención (`exceptions`: atascadas, runs de agente fallidos, milestones/ciclos vencidos o en riesgo, proyectos parados) | Cuando te pregunten «¿cómo va la compañía?», «¿qué está parado?» o «¿qué hacen los agentes?». Falla si el usuario no es dueño de ningún workspace o si la key está acotada a un proyecto |
+| `workspace_stats` | La cartera de proyectos de Insights: por cada proyecto activo, tareas (total, hechas, en revisión, en marcha, sin empezar), **ritmo** (tareas por día trabajado en los últimos 10 laborables), lo que falta y **fin previsto**, cierres/a revisión/reabiertas del rango y última actividad; más `activity`: lo hecho cada día y por persona (con horas imputadas) sumando todos los proyectos. `from`/`to` (YYYY-MM-DD, por defecto 30 días) y `tz` (por defecto Europe/Madrid) | Para el parte del día del jefe de producto, o «¿cómo van los proyectos?». Son las cifras de la app: no las recalcules leyendo issues. Solo miembros plenos; no con una key acotada |
+| `project_team_stats` | La pestaña **Equipo** de UN proyecto: KPIs, previsión, cada día (cerradas, a revisión, reabiertas, en revisión al acabar el día, acumulado, quién), cada persona (con horas), avance por grupo (`groupBy`: milestone · label · parent · none; con `parent`, el estado de cada bloque) y la actividad tarea a tarea (`items`). Filtros `persons`, `milestoneId`, `labelId`, `cycleId`; por defecto los últimos 7 días | Para «¿qué se hizo ayer en X?», «¿quién cerró qué?» o el estado de un bloque. Úsala antes de leer comentario a comentario |
 
 Reglas, en orden de lo que más te va a pasar:
 

@@ -4,6 +4,17 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.14.0] — 2026-10-14
+
+### Added
+
+- **`hilbana-mcp` skill** (40 tools, was 38): `workspace_stats` (the Insights
+  project portfolio: progress, pace and estimated end of each active project, plus
+  activity by day and by person) and `project_team_stats` (a project's Team tab:
+  KPIs, forecast, each day and person, progress by group and the task-by-task
+  activity). The skill tells the agent to use them for the daily report instead of
+  recomputing figures from issues and comments.
+
 ## [2.13.2] — 2026-10-13
 
 ### Added
