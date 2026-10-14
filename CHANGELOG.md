@@ -14,6 +14,11 @@ criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
   KPIs, forecast, each day and person, progress by group and the task-by-task
   activity). The skill tells the agent to use them for the daily report instead of
   recomputing figures from issues and comments.
+- **`/hilbana:estado-proyecto`**: shortcut for the new `estado_proyecto` MCP prompt,
+  the project manager's daily report — Team tab figures, who did what each day, the
+  team's decisions from closing comments, what's waiting for an answer and what's
+  next, as a visual panel. It proposes sending tasks back or messaging someone and
+  only does it after a yes, and keeps the report in a «Parte del proyecto» doc.
 
 ## [2.13.2] — 2026-10-13
 

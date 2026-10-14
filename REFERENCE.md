@@ -23,11 +23,12 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | [`claim_next`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:claim-next` | MCP prompt (+ shortcut) | Pull the next agent-ready issue from the queue and start it |
 | [`finish`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:finish` | MCP prompt (+ shortcut) | Close your turn on an issue in its **`agentCloseState`**, with telemetry and memory |
 | [`review`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:review` | MCP prompt (+ shortcut) | Review what's In Review: approve to Done or send back (only when the workspace closes agent work there) |
+| [`estado_proyecto`](#the-cycle-now-lives-in-the-mcp-server) + `/hilbana:estado-proyecto` | MCP prompt (+ shortcut) | The project manager's daily report: Team tab figures, who did what, decisions and what's waiting, as a visual panel |
 | [`/hilbana:plan`](#hilbanaplan) | command | Compile a goal into a DAG of sub-issues and queue the frontier |
 | [`/hilbana:trabajar-issue`](#hilbanatrabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana:crear-docs`](#hilbanacrear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
 | [`/hilbana:memoria-switch`](#hilbanamemoria-switch) | command | Move your agent memory from engram to Hilbana |
-| [`hilbana-mcp`](#hilbana-mcp) | skill | All 38 MCP tools: when to use each, with examples |
+| [`hilbana-mcp`](#hilbana-mcp) | skill | All 40 MCP tools: when to use each, with examples |
 | [`hilbana-memoria`](#hilbana-memoria) | skill | The proactive memory protocol (scope, when to save, what not to) |
 | [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope |
 | [`Stop`](#stop--sessionend-usage) | hook | Reports token spend, billed to your claimed issue |
@@ -93,6 +94,7 @@ when the server does — no plugin release needed. In Claude Code they show up a
 | `claim_next` | `[projectId]` — narrows the queue; empty = all your teams | `mem_context` → `next_ready_issue` (atomic, arrives already claimed) → *In Progress* → `get_issue` for the `agentContext` and DoD. `null` means the queue is empty: it exits clean, with no lock to release. |
 | `finish` | `[issue]` — defaults to the one you claimed | Verify the DoD (nothing advances without green) → the `agentCloseState` the workspace chose → `record_run` (always, failures included) → `mem_save` → `add_comment` for the reviewer → `release_issue` (always). |
 | `review` | `[target]` — an issue or a project; empty = the whole queue If the workspace's `agentCloseState` is a completed state there's no review queue, and it says so. Otherwise: find the issues sitting in that `stateId` → load it with `get_issue` + `list_comments` → verify the command **and** the diff against every DoD criterion → Done with an approval comment, or back to In Progress with actionable feedback. |
+| `estado_proyecto` | `[project]`, `[since]` — the project and the period; empty = ask, and since the last report | `project_team_stats` for the figures (never recount issues) → the previous «Parte del proyecto» doc → `list_comments` on the period's tasks for what each leaves done, decisions and open questions → a visual panel → proposes sending tasks back, messaging someone or accepting a decision, and only does it after a yes → saves the report with `save_doc`. |
 
 Their rules are worth knowing as a user, because they're what makes the framework
 auditable: a worker leaves its work in the `agentCloseState` the workspace chose
@@ -107,7 +109,8 @@ two things that still need the plugin.
 #### The shortcuts (2.2.0)
 
 `/mcp__plugin_hilbana_hilbana__finish` is unbearable to type, so the plugin ships
-`/hilbana:claim-next`, `/hilbana:finish` and `/hilbana:review` — **~15-line
+`/hilbana:claim-next`, `/hilbana:finish`, `/hilbana:review` and (2.14.0)
+`/hilbana:estado-proyecto` — **~15-line
 triggers**, not copies. The protocol they follow lives in the server's `instructions`
 and in the prompts themselves; the shortcut only fires it. They can't call
 `prompts/get` (Claude Code doesn't expose it as a tool), which is why they restate
