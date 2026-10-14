@@ -20,7 +20,9 @@ Cierra el turno **según el protocolo del framework**, en este orden:
    no lo busques por nombre ni lo cambies por tu cuenta.
 3. **`record_run`** siempre — también en fallo. Sin `tokenCost`: lo mide el hook.
 4. **`mem_save`** de lo durable que hayas aprendido.
-5. **`add_comment`** para quien revise: qué quedó y cómo lo verificaste.
+5. **`add_comment`** para quien revise: qué quedó y cómo lo verificaste. Si decidiste
+   algo que cambia el alcance o se aparta de lo acordado, acaba con una sección
+   **«Decisiones:»** (una línea por decisión, con el porqué).
 6. **`release_issue`** siempre, también si abortas.
 
 Si no lograste la DoD: no la dejes en el estado de cierre — devuélvela con un comentario que
