@@ -139,9 +139,26 @@ Contract rules:
 
 ## Privacy
 
-The plugin contains **no secrets**: your API key lives only in your local
-configuration (`userConfig`, marked `sensitive`). The `SessionEnd` hook sends the
-summary to your Hilbana via `POST /api/memory`, authenticated with that key.
+The plugin contains **no secrets**: your API key lives only in your local Claude Code
+configuration (`userConfig`, marked `sensitive`). Claude Code hands it to the hooks
+as the `CLAUDE_PLUGIN_OPTION_API_KEY` environment variable; the plugin never opens
+Claude Code's credential store or any other credential file.
+
+**What the plugin runs on your machine.** Three hooks, all `node` scripts bundled in
+`plugins/hilbana/scripts/` (readable source, no minified or downloaded code):
+
+| Hook | What it does | What it sends, and where |
+|------|--------------|--------------------------|
+| `SessionStart` | Prints a reminder to load memory, with this repo's scope and `git_remote`. Runs `git remote get-url origin`. | Nothing. |
+| `Stop` / `SessionEnd` (usage) | Reads the session transcript locally and adds up token counters (input, output, cache read, cache write) per model. | The counters, the model name, the session id and the agent name (`claude-code`), to `POST <base URL>/api/agents/usage`. No prompts, no responses, no file contents. |
+| `SessionEnd` (memory) | Builds a short note about the session from the transcript, and only if the session was substantial (files were edited, or there were two or more requests). | The first request you made (cut at 600 characters), the paths of the files edited (up to 40), the assistant's closing message (cut at 1,800 characters), the repo's scope and its `git_remote` (credentials stripped), to `POST <base URL>/api/memory`. It is saved as a memory in your workspace, visible to the people who share that scope. |
+
+Every request goes to **your Hilbana** (`https://app.hilbana.com` by default, or your
+own base URL) and is authenticated with your API key. Nothing is sent anywhere else.
+With no API key set, the hooks do nothing.
+
+The MCP server declared in `.mcp.json` connects to the same Hilbana URL with the same
+key. Data handling: <https://hilbana.com/en/legal/privacidad/>.
 
 Dry run for the memory save: `HILBANA_HOOK_DRYRUN=1` makes the hook print the summary
 instead of sending it.

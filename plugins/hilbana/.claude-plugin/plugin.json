@@ -2,13 +2,30 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "hilbana",
   "displayName": "Hilbana",
-  "version": "2.15.0",
+  "version": "2.15.1",
   "description": "Everything Hilbana for Claude Code in one install: persistent per-project agent memory (an engram replacement, with hooks that load context on open and save a summary on close) + the human+agent workflow framework (pull queue, the /hilbana:plan orchestrator, and the cycle prompts claim_next/finish/review served by the MCP itself) + Hilbana's MCP server auto-registered. Commands and skills are written in Spanish.",
-  "author": { "name": "Hilbana" },
+  "author": {
+    "name": "Hilbana",
+    "url": "https://hilbana.com"
+  },
+  "homepage": "https://hilbana.com",
+  "repository": "https://github.com/hilbana/claude-plugin",
   "license": "MIT",
-  "keywords": ["hilbana", "memoria", "memory", "agents", "framework", "mcp", "workflow", "orchestration", "engram"],
+  "keywords": [
+    "hilbana",
+    "memoria",
+    "memory",
+    "agents",
+    "framework",
+    "mcp",
+    "workflow",
+    "orchestration",
+    "engram"
+  ],
   "skills": "./skills/",
-  "commands": ["./commands/"],
+  "commands": [
+    "./commands/"
+  ],
   "mcpServers": "./.mcp.json",
   "userConfig": {
     "api_key": {
@@ -24,5 +41,10 @@
       "description": "Base URL of your deployment, without /mcp.",
       "default": "https://app.hilbana.com"
     }
-  }
+  },
+  "icon": "./assets/icon.png",
+  "documentationUrl": "https://hilbana.com/en/docs/plugin-claude-code/",
+  "supportUrl": "https://hilbana.com/en/contact/",
+  "privacyPolicyUrl": "https://hilbana.com/en/legal/privacidad/",
+  "termsOfServiceUrl": "https://hilbana.com/en/legal/terminos/"
 }
