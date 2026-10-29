@@ -1,45 +1,35 @@
 // Configuración compartida de los hooks del plugin.
 //
-// POR QUÉ EXISTE ESTE FICHERO: los hooks reciben la API key por `env` desde el
-// userConfig (`"HILBANA_API_KEY": "${user_config.api_key}"` en hooks.json), pero esa
-// interpolación NO siempre llega: verificado el 2026-07-27 en Windows con el plugin
-// 1.1.0 instalado, el hook arranca con la variable VACÍA. Como los hooks son
-// silenciosos por diseño (no pueden romper la sesión del usuario), el efecto era que
-// no hacían nada y sin dejar rastro: el reporte de tokens no llegaba nunca, y el
-// guardado automático de memoria de `session-end.cjs` llevaba roto lo mismo sin que
-// nadie lo notara.
+// POR QUÉ NO SE USA `env` EN hooks.json: la interpolación `${user_config.api_key}` en el
+// bloque `env` de un hook NO llega (verificado en Windows con Claude Code 2.1.312: el
+// hook arranca con la variable vacía). Lo que sí llega, y es la vía documentada, es
+// `CLAUDE_PLUGIN_OPTION_<KEY>`: Claude Code exporta cada valor de `userConfig` al
+// proceso del hook, también los marcados `sensitive`. Esa es la fuente de la clave.
 //
-// Así que el env es la fuente preferente y, si viene vacío, se lee la key del fichero
-// de credenciales donde Claude Code guarda los secretos del plugin.
+// Hasta la 2.15.0 había un respaldo que leía el fichero de secretos de Claude Code
+// en la carpeta de usuario. Se ha quitado: el hook solo lee lo que Claude
+// Code le entrega para ESTE plugin y no abre ningún fichero de credenciales.
+//
+// Los hooks son silenciosos por diseño (no pueden romper la sesión del usuario): sin
+// clave no hacen nada (opt-in).
+
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const PLUGIN_ID = "hilbana@hilbana";
 const DEFAULT_BASE_URL = "https://app.hilbana.com";
 
-/** La key del plugin en el store de secretos de Claude Code, o "" si no está. */
-function apiKeyFromCredentials() {
-  try {
-    const p = path.join(os.homedir(), ".claude", ".credentials.json");
-    const j = JSON.parse(fs.readFileSync(p, "utf8"));
-    const v = j?.pluginSecrets?.[PLUGIN_ID]?.api_key;
-    return typeof v === "string" ? v : "";
-  } catch {
-    return "";
-  }
-}
-
 /**
- * Devuelve { apiKey, baseUrl }. `apiKey` vacía = el hook no debe hacer nada (opt-in).
+ * Devuelve { apiKey, baseUrl }. `apiKey` vacía = el hook no debe hacer nada.
+ * Orden: HILBANA_API_KEY (manual, p. ej. CI) y después la opción del plugin.
  *
- * OJO con self-hosted: si el env no se interpola, `baseUrl` cae al default. No hay
- * dónde leerla (no es un secreto y no queda en .credentials.json), así que quien use
- * una instalación propia debe exportar HILBANA_BASE_URL en el entorno.
+ * OJO con self-hosted: una opción sin valor guardado no se exporta, así que `baseUrl`
+ * cae al default; quien use una instalación propia la pone en `userConfig.base_url`
+ * (llega por CLAUDE_PLUGIN_OPTION_BASE_URL) o exporta HILBANA_BASE_URL.
  */
 function resolveConfig() {
-  const apiKey = (process.env.HILBANA_API_KEY || "").trim() || apiKeyFromCredentials();
-  const baseUrl = (process.env.HILBANA_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const apiKey = (process.env.HILBANA_API_KEY || process.env.CLAUDE_PLUGIN_OPTION_API_KEY || "").trim();
+  const baseUrl = (process.env.HILBANA_BASE_URL || process.env.CLAUDE_PLUGIN_OPTION_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, "");
   return { apiKey, baseUrl };
 }
 

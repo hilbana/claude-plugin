@@ -4,6 +4,20 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.15.1] — 2026-10-29
+
+### Changed
+
+- **The hooks no longer read Claude Code's credential store.** Until 2.15.0 a fallback
+  opened `~/.claude/.credentials.json` when the API key didn't arrive by environment.
+  The key now comes from `CLAUDE_PLUGIN_OPTION_API_KEY`, which Claude Code exports to
+  every hook for each `userConfig` option (checked on Windows, Claude Code 2.1.312),
+  and the `env` blocks in `hooks.json` that never worked were removed.
+- `plugin.json` now carries the directory listing fields: `icon`, `homepage`,
+  `repository`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl` and
+  `termsOfServiceUrl`.
+- The plugin README's *Privacy* section lists exactly what each hook runs and sends.
+
 ## [2.15.0] — 2026-10-14
 
 ### Added
