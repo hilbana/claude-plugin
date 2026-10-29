@@ -8,6 +8,8 @@ persistent per-project agent memory, the human+agent workflow framework, and
 > fine whatever language you talk to Claude in — Claude reads them and replies in
 > yours — but if you plan to edit them, expect Spanish prose inside.
 
+🇪🇸 **Español:** [README.es.md](README.es.md)
+
 ## Install
 
 ```bash
@@ -28,12 +30,31 @@ optionally, a **base URL** if you self-host.
   verification, token accounting and privacy.
 - [CHANGELOG](CHANGELOG.md) — what changed in each version.
 
+## Guides, examples and prompts
+
+- **[Hilbana + Claude Code](guides/claude-code.md)** — the plugin or a plain MCP
+  connection, how to check it works, your first loop.
+  ([Español](guides/claude-code.es.md))
+- **[Hilbana + Beads](guides/beads.md)** — using Beads for an agent's own plan and
+  Hilbana for the team's board and shared memory, without duplicating work.
+  ([Español](guides/beads.es.md))
+- **[Memory examples](examples/memory)** — six realistic memories, one per type, with
+  what makes each good or bad.
+- **[Starter prompts](prompts/README.md)** — prompts to paste at the moments that
+  matter, and a snippet for `AGENTS.md` / `CLAUDE.md`. In English and Spanish.
+
 ## What's in here
 
 ```
 .claude-plugin/marketplace.json   the marketplace (a single entry: hilbana)
 plugins/hilbana/                  the plugin: commands, skills, hooks, scripts, MCP
+guides/                           Hilbana + Claude Code, Hilbana + Beads (en, es)
+examples/memory/                  six example memories, one per type
+prompts/                          starter prompts and an AGENTS.md snippet (en, es)
 ```
+
+Hilbana is a hosted product and its code is **not** open source. This repository holds
+what you run on your own machine.
 
 ## Contributing
 
