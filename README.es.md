@@ -40,6 +40,9 @@ simplemente no corren y tu sesión no se ve afectada.
 - **[Hilbana + Beads](guides/beads.es.md)**: usar Beads para el plan propio del agente e
   Hilbana para el tablero del equipo y la memoria compartida, sin duplicar trabajo.
   ([English](guides/beads.md))
+- **[Hilbana + engram](guides/engram.es.md)**: usar las dos a la vez o pasar tu memoria de
+  engram a Hilbana, con el mapa de tipos y un prompt de importación.
+  ([English](guides/engram.md))
 - **[Ejemplos de memoria](examples/memory)** (en inglés): seis memorias realistas, una por
   tipo, con lo que hace buena o mala a cada una.
 - **[Prompts de inicio](prompts/README.md)**: prompts para pegar en los momentos que
@@ -50,7 +53,7 @@ simplemente no corren y tu sesión no se ve afectada.
 ```
 .claude-plugin/marketplace.json   el marketplace (una sola entrada: hilbana)
 plugins/hilbana/                  el plugin: comandos, skills, hooks, scripts, MCP
-guides/                           Hilbana + Claude Code, Hilbana + Beads (es, en)
+guides/                           Hilbana + Claude Code, Hilbana + Beads, Hilbana + engram (es, en)
 examples/memory/                  seis memorias de ejemplo, una por tipo
 prompts/                          prompts de inicio y un fragmento de AGENTS.md (es, en)
 ```
