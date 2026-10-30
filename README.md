@@ -38,6 +38,9 @@ optionally, a **base URL** if you self-host.
 - **[Hilbana + Beads](guides/beads.md)** — using Beads for an agent's own plan and
   Hilbana for the team's board and shared memory, without duplicating work.
   ([Español](guides/beads.es.md))
+- **[Hilbana + engram](guides/engram.md)** — run both side by side or move your engram
+  memory to Hilbana, with the type mapping and an import prompt.
+  ([Español](guides/engram.es.md))
 - **[Memory examples](examples/memory)** — six realistic memories, one per type, with
   what makes each good or bad.
 - **[Starter prompts](prompts/README.md)** — prompts to paste at the moments that
@@ -48,7 +51,7 @@ optionally, a **base URL** if you self-host.
 ```
 .claude-plugin/marketplace.json   the marketplace (a single entry: hilbana)
 plugins/hilbana/                  the plugin: commands, skills, hooks, scripts, MCP
-guides/                           Hilbana + Claude Code, Hilbana + Beads (en, es)
+guides/                           Hilbana + Claude Code, Hilbana + Beads, Hilbana + engram (en, es)
 examples/memory/                  six example memories, one per type
 prompts/                          starter prompts and an AGENTS.md snippet (en, es)
 ```
