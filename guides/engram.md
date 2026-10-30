@@ -87,8 +87,8 @@ What it does, and what you can do by hand:
    it with `mem_context`. If the loop closes, the switch works.
 2. **Run both for a few days.** Keep saving to engram too while you check you recover
    what you need from Hilbana. If something's missing, migrate it or save it again.
-3. **Retire the engram plugin** once you no longer reach for it: disable it from
-   `/plugin` (it's `engram@engram`). **Keep `~/.engram/engram.db`** until you've migrated
+3. **Retire the engram plugin** once you no longer reach for it: disable it with
+   `claude plugin disable engram@engram` (or from `/plugin`). **Keep `~/.engram/engram.db`** until you've migrated
    what you want; deleting it can't be undone.
 4. **(Optional) Import the history.**
 
@@ -97,18 +97,26 @@ What it does, and what you can do by hand:
 engram exports to JSON:
 
 ```bash
-engram export engram-milindri.json --project milindri   # one project
-engram export engram-all.json --all                     # everything
+engram export engram-export.json
 ```
 
-> Always put the file name **before** the options, and don't try `--help` as an argument
-> to `export`: in the versions we've seen, `engram export --help` doesn't print help, it
-> dumps all your memories into a file called `--help`.
+In version 1.17.0, the one we tried, `engram export` dumps **all** your projects and doesn't
+accept `--project` or `--all`. engram's README describes those options, so newer versions may
+support them; check that the file only contains what you expect. Whatever the version, the
+same approach works: export everything and keep the `project` you care about.
+
+> Two cautions about the export:
+> - **The first argument is always the file name.** `engram export --help` or
+>   `engram export --project x` don't print help or filter: they create a file called
+>   `--help` or `--project` with all your memories.
+> - **That file holds all your projects, personal ones included.** Don't upload it anywhere
+>   and delete it when you're done.
 
 Hilbana has no bulk-import command: your agent does the migration by reading the JSON
 and calling `mem_save` one observation at a time. Ask it like this:
 
-> Read `engram-milindri.json`. For each observation, save it to Hilbana with `mem_save`
+> Read `engram-export.json` and keep only the observations whose `project` is `milindri`.
+> For each one, save it to Hilbana with `mem_save`
 > using `scope: "milindri"`, the `title` and `content` joined as the content (`mem_save`
 > has no title field), the `type` translated per the table and the same `topic_key`.
 > Before writing anything, show me a summary: how many there are per type and which scope

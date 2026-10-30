@@ -86,8 +86,8 @@ Lo que hace, y lo que puedes hacer tú a mano:
    la recupera con `mem_context`. Si el ciclo cierra, el cambio ya va.
 2. **Convivencia unos días.** Sigue guardando también en engram mientras compruebas que
    recuperas bien desde Hilbana. Si echas algo en falta, lo migras o lo vuelves a guardar.
-3. **Retira el plugin de engram** cuando ya no lo uses: desactívalo desde `/plugin`
-   (es `engram@engram`). **Conserva `~/.engram/engram.db`** hasta haber migrado lo que
+3. **Retira el plugin de engram** cuando ya no lo uses: desactívalo con
+   `claude plugin disable engram@engram` (o desde `/plugin`). **Conserva `~/.engram/engram.db`** hasta haber migrado lo que
    quieras; borrarlo no se deshace.
 4. **(Opcional) Importa el histórico.**
 
@@ -96,18 +96,26 @@ Lo que hace, y lo que puedes hacer tú a mano:
 engram exporta a JSON:
 
 ```bash
-engram export engram-milindri.json --project milindri   # un proyecto
-engram export engram-todo.json --all                    # todo
+engram export engram-export.json
 ```
 
-> Pon siempre el nombre del fichero **antes** de las opciones y no pruebes `--help` como
-> argumento de `export`: en las versiones que hemos visto, `engram export --help` no
-> enseña ayuda, sino que vuelca todas tus memorias a un fichero llamado `--help`.
+En la versión 1.17.0 que probamos, `engram export` vuelca **todos** tus proyectos y no admite
+`--project` ni `--all`. El README de engram describe esas opciones, así que en versiones
+más recientes quizá funcionen; comprueba que el fichero solo trae lo que esperas. Con
+cualquier versión sirve lo mismo: exportar todo y quedarte con el `project` que te interesa.
+
+> Dos cuidados con el export:
+> - **El primer argumento es siempre el nombre del fichero.** `engram export --help` o
+>   `engram export --project x` no muestran ayuda ni filtran: crean un fichero llamado
+>   `--help` o `--project` con todas tus memorias.
+> - **Ese fichero tiene todos tus proyectos, también los personales.** No lo subas a ningún
+>   sitio y bórralo cuando termines.
 
 No hay un comando de importación masiva en Hilbana: la migración la hace tu agente,
 leyendo el JSON y llamando a `mem_save` observación a observación. Pídeselo así:
 
-> Lee `engram-milindri.json`. Para cada observación, guárdala en Hilbana con `mem_save`
+> Lee `engram-export.json` y quédate solo con las observaciones cuyo `project` sea
+> `milindri`. Para cada una, guárdala en Hilbana con `mem_save`
 > con `scope: "milindri"`, el `title` y el `content` juntos como contenido (`mem_save` no
 > tiene campo de título), el `type` traducido según la tabla y el mismo `topic_key`.
 > Antes de escribir nada,
