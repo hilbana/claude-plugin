@@ -17,6 +17,10 @@ framework**.
     context (`mem_context`) and to save proactively.
   - `SessionEnd` hook: on close, it automatically saves a summary of the session.
   - `/hilbana:memoria-switch` to import your engram history.
+- **Your team's skills** (`/hilbana:skills`): install, update, remove and publish the skills
+  your workspace shares in Hilbana, with their dependencies. Nothing is written without
+  showing you the full plan first; new versions are announced at session start, never
+  applied on their own.
 - **Per-task token accounting**:
   - `Stop` / `SessionEnd` hooks report the tokens the agent spent and bill them to
     the issue it has claimed. See *Token accounting* below.
@@ -149,7 +153,8 @@ Claude Code's credential store or any other credential file.
 
 | Hook | What it does | What it sends, and where |
 |------|--------------|--------------------------|
-| `SessionStart` | Prints a reminder to load memory, with this repo's scope and `git_remote`. Runs `git remote get-url origin`. | Nothing. |
+| `SessionStart` | Prints a reminder to load memory, with this repo's scope and `git_remote`. Runs `git remote get-url origin`. Also reads your skills manifest to flag new versions of the skills you installed. | Nothing about your work. One `GET <base URL>/api/skills/manifest` (2.5 s timeout) to read your skills metadata. |
+| `/hilbana:skills` (on demand) | Lists, installs, updates and removes skills in `~/.claude/skills/`, after showing you the full plan. Keeps a registry in `~/.claude/hilbana-skills/`. | Which skills you chose and which version you installed, to `<base URL>/api/skills/…`. |
 | `Stop` / `SessionEnd` (usage) | Reads the session transcript locally and adds up token counters (input, output, cache read, cache write) per model. | The counters, the model name, the session id and the agent name (`claude-code`), to `POST <base URL>/api/agents/usage`. No prompts, no responses, no file contents. |
 | `SessionEnd` (memory) | Builds a short note about the session from the transcript, and only if the session was substantial (files were edited, or there were two or more requests). | The first request you made (cut at 600 characters), the paths of the files edited (up to 40), the assistant's closing message (cut at 1,800 characters), the repo's scope and its `git_remote` (credentials stripped), to `POST <base URL>/api/memory`. It is saved as a memory in your workspace, visible to the people who share that scope. |
 

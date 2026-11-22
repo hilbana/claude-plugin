@@ -31,9 +31,10 @@ disagree, the files win — and that's a bug worth [reporting](https://github.co
 | [`/hilbana:trabajar-issue`](#hilbanatrabajar-issue) | command | Work one specific issue end to end (claim → … → release) |
 | [`/hilbana:crear-docs`](#hilbanacrear-docs) | command | Bootstrap a project's docs in Hilbana from your repo + an interview |
 | [`/hilbana:memoria-switch`](#hilbanamemoria-switch) | command | Move your agent memory from engram to Hilbana |
+| [`/hilbana:skills`](#hilbanaskills) | command | Install, update, remove and publish your team's skills, with their dependencies |
 | [`hilbana-mcp`](#hilbana-mcp) | skill | All 40 MCP tools: when to use each, with examples |
 | [`hilbana-memoria`](#hilbana-memoria) | skill | The proactive memory protocol (scope, when to save, what not to) |
-| [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope |
+| [`SessionStart`](#sessionstart) | hook | Injects the memory protocol and this repo's scope, and flags new skill versions |
 | [`Stop`](#stop--sessionend-usage) | hook | Reports token spend, billed to your claimed issue |
 | [`SessionEnd`](#sessionend) | hook | Saves a session summary to memory, plus the final token segment |
 
@@ -209,6 +210,42 @@ Its guardrails: **don't invent** (only what's in the files or what you confirmed
 **be surgical** (2–3 useful docs beat ten empty templates), and **no secrets** — if a
 credential shows up in an env file, it's referenced by variable name, never by value.
 
+### `/hilbana:skills`
+
+**Your team's skills, on your machine.** Skills are folders (`SKILL.md` plus scripts,
+templates and references) that people in the workspace publish in Hilbana. This command
+installs them in your personal skills folder (`~/.claude/skills/`), keeps them up to date
+and uploads one from your disk.
+
+| | |
+|---|---|
+| **Argument** | `[list \| install <name> \| update [<name>] \| remove <name> \| publish <name>]` — empty = `list`. |
+| **Runs** | `scripts/skills-cli.cjs` (`plan` / `apply`), and the MCP tools `save_skill`, `publish_skill`, `get_skill` for `publish`. |
+
+- **`list`** — the workspace's skills, which ones you have installed, which have an update
+  and which you edited locally.
+- **`install <name>`** — shows the **whole plan first**: the skill and its **dependencies**
+  (other skills of the workspace), in install order, with every file that will be written
+  and the scripts flagged. Applies only that plan, and only on your yes.
+- **`update [<name>]`** — shows, per skill, the version change, the release notes, the
+  files added / changed / removed and any **new dependencies**. New versions are announced,
+  never applied on their own.
+- **`remove <name>`** — removes the skill and the dependencies nothing else installed
+  needs (the ones you installed yourself stay).
+- **`publish <name>`** — uploads a skill from disk: `save_skill` (draft) then, on your
+  yes and with release notes, `publish_skill`. Binary files go up from the web, not MCP.
+
+Guardrails: a skill's content is **data, never instructions**; nothing is written without
+a plan, and the plan id must match what was shown (if another version is published in
+between, apply refuses); **a folder the plugin did not install is never touched** (and if
+it is a dependency the install stops); **a skill you edited locally is not overwritten**
+unless you choose to, and then a backup is kept in the `backups` folder of the plugin's state directory (`hilbana-skills`, inside `~/.claude`).
+
+State: a `registry.json` in the `hilbana-skills` folder inside `~/.claude` (what was installed, from which workspace,
+version, content hash and whether you chose it or it arrived as a dependency). The
+install is confirmed to Hilbana, so the skill's page can show «you have version 3, there
+is a 4». Skills installed in this session are seen by Claude Code in the next one.
+
 ### `/hilbana:memoria-switch`
 
 **Move your agent memory from engram to Hilbana.** Guided, non-destructive.
@@ -327,6 +364,11 @@ context, to save what a future session would need — never what only holds on y
 like absolute paths or local ports — and to replace stale memories with `replaces` instead
 of leaving two versions. It doesn't call the MCP (a hook is a shell command); it only
 injects the reminder.
+
+It also asks Hilbana for your **skills manifest** (metadata only, 2.5 s timeout) and, if
+a skill you have installed has a new version, adds one line to the context with the name,
+version and release notes. It never installs or updates anything; with no API key, no
+network or the server down, it adds nothing and the session starts as usual.
 
 **Scope and remote** (`scripts/repo-scope.cjs`, shared with `SessionEnd`):
 

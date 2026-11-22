@@ -4,13 +4,34 @@
 // (ver repo-scope.cjs) y recuerda al agente cargar/guardar memoria por las tools
 // mcp__hilbana__mem_*. No llama al MCP (un hook es un shell command); solo
 // inyecta el recordatorio como contexto.
+//
+// DRAPPS-2780: además pide el manifiesto de skills del workspace (con un timeout
+// corto) y, si hay versiones nuevas de las que tienes instaladas, lo añade al
+// contexto en una línea. NO instala ni actualiza nada. Sin API key, sin red o con
+// el servidor caído no añade nada y la sesión arranca igual.
 const { resolveRepoScope } = require("./repo-scope.cjs");
+const { makeTracer } = require("./plugin-config.cjs");
+const skills = require("./skills-lib.cjs");
+
+// Muy por debajo del timeout del hook (10 s): el arranque no puede esperar al servidor.
+const SKILLS_TIMEOUT_MS = 2500;
+const trace = makeTracer("session-start");
 
 let input = "";
 process.stdin.on("data", (c) => (input += c));
-process.stdin.on("end", () => finish(input));
+process.stdin.on("end", () => void main(input));
 
-function finish(raw) {
+async function main(raw) {
+  let notice = "";
+  try {
+    notice = await skills.checkNotice(skills.makeContext({ timeoutMs: SKILLS_TIMEOUT_MS }));
+  } catch (e) {
+    trace(`skills: ${e && e.message}`);
+  }
+  finish(raw, notice);
+}
+
+function finish(raw, skillsNotice) {
   let cwd = process.cwd();
   try {
     const j = JSON.parse(raw || "{}");
@@ -47,7 +68,8 @@ function finish(raw) {
     `sustitúyelo con mem_save { …, "replaces": "<id de la vieja>" } en vez de dejar dos versiones que se contradicen. ` +
     `Al CERRAR la sesión, antes de decir "listo": ` +
     `mem_session_summary { ${id}, "summary": "objetivo/logros/próximos pasos" }. ` +
-    `type debe ser uno de: decision | bug | convention | discovery | preference | fact | note.`;
+    `type debe ser uno de: decision | bug | convention | discovery | preference | fact | note.` +
+    (skillsNotice ? ` ${skillsNotice}` : "");
 
   process.stdout.write(
     JSON.stringify({
