@@ -4,6 +4,36 @@ Notable changes to the `hilbana` plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows the
 criteria in the [README](README.md#what-counts-as-patch-minor-or-major).
 
+## [2.16.0] — 2026-11-22
+
+### Added
+
+- **Your team's skills, on your machine.** Skills published in Hilbana (folders with a
+  `SKILL.md` and their files) can now be installed from the plugin:
+  - **`/hilbana:skills`**: `list`, `install`, `update`, `remove` and `publish`. Installs
+    go to your personal skills folder (`~/.claude/skills/`), so they work in every repo.
+    Installing one brings its **dependencies** (other skills of the workspace); removing
+    one drops the dependencies nothing else needs.
+  - **Nothing is written without a plan first.** A skill can ship scripts that run on your
+    machine, and a dependency may be published by someone else, so install and update
+    always show every file they will write (scripts flagged), dependencies included, and
+    only apply that exact plan.
+  - **Your edits are safe.** A skill you edited locally is not overwritten on update unless
+    you choose to (with a backup). A folder the plugin did not install is never touched; if
+    it was a dependency, the install stops and says why.
+  - **`SessionStart` now tells you about new versions** of the skills you have installed, in
+    one line with the name, version and release notes. It never installs or updates
+    anything by itself, and it stays silent without an API key or network.
+  - `publish` uploads a skill from disk with the new MCP tools `save_skill` and
+    `publish_skill` (two steps: saving does not publish).
+  - A local registry (`~/.claude/hilbana-skills/registry.json`) records what was installed,
+    from which workspace, which version, and whether you chose it or it came as a dependency.
+
+### Changed
+
+- The `SessionStart` hook now makes one short request to Hilbana (2.5 s timeout) to read
+  your skills manifest (metadata only). See *Privacy* in the plugin README.
+
 ## [2.15.1] — 2026-10-29
 
 ### Changed
